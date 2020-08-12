@@ -1,0 +1,2 @@
+aiohttp==3.6.2
+node-events==0.6.9
