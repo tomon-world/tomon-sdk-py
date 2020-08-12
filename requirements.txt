@@ -1,3 +1,4 @@
 aiohttp==3.6.2
 node-events==0.6.9
 websocket-client~=0.57.0
+autopep8==1.5.4

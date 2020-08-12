@@ -1,8 +1,10 @@
-import pdb
-import aiohttp
-import json
+import os
 from urllib.parse import quote as _uriquote
-import asyncio
+import json
+import aiohttp
+from .utils.observable import Observable
+
+import pdb
 
 
 async def json_or_text(response):
@@ -26,42 +28,71 @@ class Route:
         url = (self.Base + str(self.path))
         self.url = url
 
-        #self.channel_id = parameters.get('channel_id')
-        #self.guild_id = parameters.get('guild_id')
+        # self.channel_id = parameters.get('channel_id')
+        # self.guild_id = parameters.get('guild_id')
 
-    async def post(self, **kwargs):
-        return await self.request('POST', self.url, kwargs)
+    def auth(self):
+        if (self.token == None):
+            return None
+
+        return ('Bearer ' + self.token)
 
     async def request(self, method, url, *args):
-        for each in list(args):
-            if 'data' in each:
-                payload = each['data']
 
         headers = {}
-        print(self.token)
-        # if self.token is not None:
-        #     headers['authorization'] = self.auth()
+        payload = {}
+        
+        for arg in list(args):
+            if 'auth' in arg and arg['auth'] == True:
+                headers['authorization'] = self.auth()
 
-        headers['Content-Type'] = 'application/json'
+            if 'data' in arg:
+                payload = arg['data']
+    
+         
+            if 'files' in arg:
+                payload = aiohttp.FormData()
+                if len(arg['files']) == 1:
+                    filepath = arg['files'][0]
+                    filename = os.path.basename(filepath)
+                    payload.add_field('file', open(filepath, 'rb'), filename = filename)
 
-        kwargs = {}
-        kwargs['headers'] = headers
-        kwargs['data'] = payload
+                    if 'data' in arg:
+                        payload.add_field('payload_json', json.dumps(arg['data']))
 
         try:
-
-            async with aiohttp.request(method=method, url=url, data=payload) as r:
-                if r.status == 200:
-                    print(await r.json())
+            async with aiohttp.request(method=method, url=url, data=payload, headers = headers) as r:
+                if 300 > r.status >= 200:
                     return await r.json()
+                elif (r.status == 404):
+                    print("Not Found") 
+                elif (r.status == 403):
+                    print("Forbidden")
                 else:
-                    print('fail')
+                    print(await r.json())
 
         except Exception as e:
             print(e)
 
 
-class Bot:
+    async def post(self, **kwargs):
+        return await self.request('POST', self.url, kwargs)
+
+    async def get(self, **kwargs):
+        return await self.request('GET', self.url, kwargs)
+
+    async def patch(self, **kwargs):
+        return await self.request('PATCH', self.url, kwargs)
+
+    async def put(self, **kwargs):
+        return await self.request('PUT', self.url, kwargs)
+
+    async def delete(self, **kwargs):
+        return await self.request('DELETE', self.url, kwargs)
+
+
+
+class Bot(Observable):
 
     def __init__(self):
 
@@ -124,7 +155,8 @@ class Bot:
             credencials['password'] = kwargs['password']
         print('⏳ Start authenticating...')
         try:
-            info = await self.route(path='/auth/login', token=None).post(data=credencials)
+            # pdb.set_trace()
+            info = await self.route(path='/auth/login', token=None).post(data=credencials, auth=False)
 
             # self.api.token = info.token
             # self.session.token = info.token
@@ -135,7 +167,16 @@ class Bot:
             print("🎫 Bot {}({}#{}) is authenticated.".format(
                 info.get('name'), info.get('username'), info.get('discriminator')))
 
-            self.route(path=None, token=info.get('token'))
+            guild_id = "124456710235492352"
+            #/file = [('images', open(image_path))]
+
+            
+            msg = {"content":"test_image_upload"}
+
+            uploads = await self.route(path='/channels/151217779805831168/messages', token=info.get('token')).post(data= msg, files = ['./example.jpg'],auth = True)
+            ### get channels
+            #channels = await self.route(path='/guilds/124456710235492352/channels', token=info.get('token')).get( auth = True)
+            print(uploads)
 
         except Exception as e:
             print("❌ Authentication failed. Please check your identity.")
@@ -150,10 +191,3 @@ class Bot:
 
     async def startWithPassword(self, fullname, password):
         return await self._start(full_name=fullname, password=password)
-
-
-bot = Bot()
-
-loop = asyncio.get_event_loop()
-result = loop.run_until_complete(
-    bot.startWithPassword('xiao#8050', '***'))
