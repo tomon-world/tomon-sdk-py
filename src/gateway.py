@@ -1,5 +1,6 @@
 import asyncio
 import json
+from enum import Enum
 
 import websocket
 
@@ -7,6 +8,14 @@ try:
     import thread
 except ImportError:
     import _thread as thread
+
+
+class WSState(Enum):
+    CONNECTING = 0
+    OPEN = 1
+    CLOSING = 2
+    CLOSED = 3
+    RECONNECTING = 4
 
 
 class TomonWebsocket:
