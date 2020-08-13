@@ -1,5 +1,4 @@
 from enum import Enum
-
 import websocket
 import json
 from threading import Timer
@@ -100,6 +99,7 @@ class WS:
     def _onOpen(self, ws):
         self._retryCount = 0
         self._reconnecting = False
+        self._stopReconnect()
         if self.onOpen is not None:
             self.onOpen()
 
@@ -115,8 +115,10 @@ class WS:
     def _onMessage(self, ws, data):
         if self.onMessage is not None:
             self.onMessage(data=data)
+            # {}
 
     def _onError(self, ws, error):
         self._connectError = error
         if self.onError is not None:
             self.onError(message=str(error))
+            

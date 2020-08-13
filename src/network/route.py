@@ -4,6 +4,7 @@ import os
 
 class Route:
     Base = "https://beta.tomon.co/api/v1"
+    #Base = "http://localhost/api/v1"
 
     def __init__(self, path, token):
 
@@ -11,9 +12,6 @@ class Route:
         self.token = token
         url = (self.Base + str(self.path))
         self.url = url
-
-        # self.channel_id = parameters.get('channel_id')
-        # self.guild_id = parameters.get('guild_id')
 
     def auth(self):
         if (self.token == None):

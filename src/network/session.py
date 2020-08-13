@@ -2,6 +2,7 @@ from ..utils.observable import Observable
 from . import ws
 import json
 import enum
+import zlib
 
 class GatewayOp(enum.Enum):
     DISPATCH = 0
@@ -11,12 +12,13 @@ class GatewayOp(enum.Enum):
     HEARTBEAT_ACK = 4
     VOICE_STATE_UPDATE = 5
 
-class session:
+class Session:
 
     BASE_WS = 'wss://gateway.tomon.co'
 
-    def __init__(self, _ws):
-        self._zlib = zlib.decompressobj()
+    def __init__(self, zlib = False):
+        # self._zlib = zlib.decompressobj()
+        self._zlib = zlib
         if self._zlib:
             self._url = BASE_WS + 'compress=zlib-stream'
         else:
@@ -35,11 +37,13 @@ class session:
         # self._inflate = None
 
         self.token = None;
+        
         self._buffer = bytearray()
   
 		### ????
-        self.handleOpen(self._ws.onOpen)   
-        self._ws.onClose = self.handleClose(event)
+        self._ws.onOpen = self.handleOpen()
+        # self.handleOpen(self._ws.onOpen)   
+        self._ws.onClose = self.handleClose(reason)
         self._ws.onMessage = self.handleMessage(event)
         self._ws.onReconnect = self._emitter.emit('NETWORK_RECONNECTING', event)
 
@@ -102,7 +106,7 @@ class session:
 
             if len(msg) >= 4:
                 if msg[-4:] == b'\x00\x00\xff\xff':
-                    msg = self._zlib.decompress(self._buffer)
+                    msg = zlib.decompressobj().decompress(self._buffer)
                     self._buffer = bytearray()
         
         try:
@@ -139,10 +143,10 @@ class session:
     def heartbeat(self):
         self._emitter.emit('HEARTBEAT')
         self.send(GatewayOp.HEARTBEAT)
-        self._heartbeatTimer = setTimeout(self.heartbeat, self._heartbeatInterval)
+        self._heartbeatTimer = Timer(self._heartbeatInterval, self.heartbeat)
 
     def stopHeartbeat(self):
         if (self._heartbeatTimer):
-            clearTimeout(self._heartbeatTimer)
+            self._heartbeatTimer.cancel()
             self._heartbeatTimer = None
 

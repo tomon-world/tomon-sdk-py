@@ -7,7 +7,7 @@ class Observable:
 
     def __init__(self):
         pass
-
+    
     def on(self, event, listener):
         return emitter.on(event, listener)
 
