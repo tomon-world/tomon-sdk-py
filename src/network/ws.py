@@ -78,6 +78,7 @@ class WS:
         if self._reconnectTimer is not None:
             self._reconnectTimer.cancel()
         self._reconnecting = True
+        self._connectError = None
 
         def retryFunc():
             self._retryCount += 1
@@ -105,8 +106,11 @@ class WS:
     def _onClose(self, ws):
         if self._connectError is None:
             self._reconnect(self.url())
-        if self.onClose is not None:
-            self.onClose()
+            if self.onClose is not None:
+                self.onClose()
+        else:
+            if self.onClose is not None:
+                self.onClose(message=str(self._connectError))
 
     def _onMessage(self, ws, data):
         if self.onMessage is not None:
