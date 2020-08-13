@@ -23,8 +23,11 @@ class session:
             self._url = BASE_WS
         # self._url = self._zlib ? BASE_WS + 'compress=zlib-stream' : 
         self._emitter = Observable
+        
+        self._heartbeatTimer = None
+        self._heartbeatInternal = 40000
 
-        self._ws = WS
+        self._ws = ws.WS()
         self._ready = False
         self._connected = False
 
@@ -50,20 +53,20 @@ class session:
     def send(self, op, d):
         self._ws.send({op, d})
 
-    def state():
+    def state(self):
         return self._ws.state
 
-    def connected():
+    def connected(self):
         return self._connected
 
-    def ready():
+    def ready(self):
         return self._ready
 
-    def handleOpen():
-        self._connected = true
+    def handleOpen(self):
+        self._connected = True
         self._emitter.emit('NETWORK_CONNECTED')
 
-    def handleClose(code, reason):
+    def handleClose(self, code, reason):
         self.stopHeartbeat()
         self._sessionId = None
         self._connected = False
@@ -71,8 +74,8 @@ class session:
         self._emitter.emit('NETWORK_DISCONNECTED')
 
 
-    def unpack(data):
-        if(type(data) not str):
+    def unpack(self, data):
+        if(isinstance(data, str)):
             data = data.decode('utf-8')
         return json.loads(data)
         
@@ -87,11 +90,12 @@ class session:
 
     async def send(self, data):
         self._dispatch('socket_raw_send', data)
-        await self._ws.send_str(data) 
+        await self._ws.send_str(data)
 
 
-    async def handleMessage(self, event):
-        msg = event.get("data")
+
+	async def handleMessage(self, event):
+		msg = event.get("data")
 
         if type(msg) is bytes:
             self._buffer.extend(msg)
@@ -134,11 +138,11 @@ class session:
 
     def heartbeat(self):
         self._emitter.emit('HEARTBEAT')
-        self.send(self.HEARTBEAT)
-        # self._heartbeatTimer = settimeout
+        self.send(GatewayOp.HEARTBEAT)
+        self._heartbeatTimer = setTimeout(self.heartbeat, self._heartbeatInterval)
 
     def stopHeartbeat(self):
-        if (self._heartbeatTImer):
-            clearTimeout(self._heartbeatTImer)
-            self._hearbeatTimer = None
+        if (self._heartbeatTimer):
+            clearTimeout(self._heartbeatTimer)
+            self._heartbeatTimer = None
 
