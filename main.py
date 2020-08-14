@@ -12,8 +12,8 @@ def onDispatch(data):
     e = data.get('e')
     d = data.get('d')
     if e == 'USER_TYPING':
-        typingschema = marshmallow_dataclass.class_schema(UserTyping)
-        typing: UserTyping = typingschema().load(d)
+        typingschema = marshmallow_dataclass.class_schema(Typing)
+        typing: Typing = typingschema().load(d)
         print(typing)
         return
     if e == 'USER_PRESENCE_UPDATE':

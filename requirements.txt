@@ -4,3 +4,4 @@ websocket-client~=0.57.0
 autopep8==1.5.4
 
 marshmallow~=3.7.1
+marshmallow-dataclass==8.0.0
