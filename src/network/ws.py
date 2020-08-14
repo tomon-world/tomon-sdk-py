@@ -33,8 +33,8 @@ class WS:
             return 100000
 
     def __init__(self):
-        websocket.enableTrace(True)
-        self._ws = websocket.WebSocketApp()
+        # websocket.enableTrace(True)
+        self._ws = None
         self._retryCount = 0
         self._reconnecting = False
         self._reconnectTimer = None
@@ -58,8 +58,8 @@ class WS:
             self._close(code, reason)
 
     def send(self, data):
-        if self.state != WSState.OPEN:
-            return
+        # if self.state != WSState.OPEN:
+        #     return
         if self._ws is not None:
             self._ws.send(json.dumps(data))
 
@@ -70,7 +70,8 @@ class WS:
         return self._reconnecting
 
     def _connect(self, url: str):
-        self._ws = websocket.WebSocketApp(url, on_open=self.onOpen, on_close=self.onClose, on_error=self.onError,
+        websocket.enableTrace(True)
+        self._ws = websocket.WebSocketApp(url, on_open=self._onOpen, on_close=self.onClose, on_error=self.onError,
                                           on_message=self.onMessage)
 
     def _reconnect(self, url: str):
@@ -110,12 +111,11 @@ class WS:
                 self.onClose()
         else:
             if self.onClose is not None:
-                self.onClose(message=str(self._connectError))
+                self.onClose(reason = str(self._connectError))
 
     def _onMessage(self, ws, data):
         if self.onMessage is not None:
-            self.onMessage(data=data)
-            # {}
+            self.onMessage(data)
 
     def _onError(self, ws, error):
         self._connectError = error

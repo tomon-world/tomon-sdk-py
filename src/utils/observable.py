@@ -1,6 +1,5 @@
 from node_events import EventEmitter
 
-
 class Observable:
 
     emitter = EventEmitter()
@@ -9,13 +8,13 @@ class Observable:
         pass
     
     def on(self, event, listener):
-        return emitter.on(event, listener)
+        return self.emitter.on(event, listener)
 
     def off(self, event, listener):
-        return emitter.off(event, listener)
+        return self.emitter.off(event, listener)
 
     def once(self, event, listener):
-        return emitter.once(event, listener)
+        return self.emitter.once(event, listener)
 
     def emit(self, event, *args):
-        return emitter.emit(event, *args)
+        return self.emitter.emit(event, *args)

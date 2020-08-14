@@ -74,10 +74,9 @@ class HTTPClient:
             if forward:
                 payload['forward'] = forward
                 
-            r = await route.Route(path= '/channels/{}/messages/{}'.format(channel_id, message_id),token = token).patch(data = payload, auth = True) 
+            await route.Route(path= '/channels/{}/messages/{}'.format(channel_id, message_id),token = token).patch(data = payload, auth = True) 
         except Exception as e:
-            print(e)
-        return r        
+            print(e)       
     
     # get guild channels
     async def get_guild_channels(self, token, guild_id):

@@ -2,8 +2,9 @@ import json
 import aiohttp
 from .utils.observable import Observable
 from .network import route
+import asyncio
 # from events import EventType
-# from .network import session
+from .network import session
 import pdb
 
 class Bot(Observable):
@@ -26,7 +27,7 @@ class Bot(Observable):
         return self._token
 
     def session(self):
-        return self._session()
+        return self._session
 
     def id(self):
         return self._id
@@ -41,7 +42,7 @@ class Bot(Observable):
         return self._discriminator
 
     def emit(self, event, *args):
-        return super().emit(event, *args)
+        return super().emitter.emit(event, *args)
 
     def on(self, event, listener):
         return super().emitter.on(event, listener)
@@ -83,7 +84,7 @@ class Bot(Observable):
         except Exception as e:
             print("❌ Authentication failed. Please check your identity.")
         
-        # self.session.open()
+        # self.session().open()
         print("🚢 Connecting...")
 
         self.once('READY', self.ready_test(self._name, self._username, self._discriminator))

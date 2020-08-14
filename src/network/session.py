@@ -12,19 +12,17 @@ class GatewayOp(enum.Enum):
     HEARTBEAT_ACK = 4
     VOICE_STATE_UPDATE = 5
 
-class Session:
+class Session(Observable):
 
-    BASE_WS = 'wss://gateway.tomon.co'
+    BASE_WS = 'wss://gateway.tomon.co/'
 
     def __init__(self, zlib = False):
-        # self._zlib = zlib.decompressobj()
         self._zlib = zlib
         if self._zlib:
-            self._url = BASE_WS + 'compress=zlib-stream'
+            self._url = self.BASE_WS + 'compress=zlib-stream'
         else:
-            self._url = BASE_WS
-        # self._url = self._zlib ? BASE_WS + 'compress=zlib-stream' : 
-        self._emitter = Observable
+            self._url = self.BASE_WS
+        # self._emitter = Observable
         
         self._heartbeatTimer = None
         self._heartbeatInternal = 40000
@@ -34,27 +32,36 @@ class Session:
         self._connected = False
 
         self._sessionId = None
-        # self._inflate = None
-
         self.token = None;
-        
         self._buffer = bytearray()
-  
-		### ????
-        self._ws.onOpen = self.handleOpen()
-        # self.handleOpen(self._ws.onOpen)   
-        self._ws.onClose = self.handleClose(reason)
-        self._ws.onMessage = self.handleMessage(event)
-        self._ws.onReconnect = self._emitter.emit('NETWORK_RECONNECTING', event)
+          
+        #???   what is this
+        self._ws.onOpen = self.handleOpen
+        self._ws.onClose = self.handleClose  
+        self._ws.onMessage = self.handleMessage
+        self._ws.onReconnect = self._emitter.emit('NETWORK_RECONNECTING')
+        # self._emitter.emit('NETWORK_RECONNECTING', self._ws.onReconnect)
 
 
+    def emit(self, event, *args):
+        return super().emitter.emit(event, *args)
+
+    def on(self, event, listener):
+        return super().emitter.on(event, listener)
+
+    def off(self, event, listener):
+        return super().emitter.off(event, listener)
+
+    def once(self, event, listener):
+        return super().emitter.once(event, listener)
+    
     def open(self):
-        self._ws.open(self.url)
+        self._ws.open(self._url)
 
-    def close(self, code, reason):
+    def close(self, code = None, reason = None):
         self._ws.close(code, reason)
 
-    def send(self, op, d):
+    def send(self, op, d= None):
         self._ws.send({op, d})
 
     def state(self):
@@ -68,9 +75,11 @@ class Session:
 
     def handleOpen(self):
         self._connected = True
-        self._emitter.emit('NETWORK_CONNECTED')
+        # import pdb; pdb.set_trace()
+        print(self.emit)
+        self.emit('NETWORK_CONNECTED')
 
-    def handleClose(self, code, reason):
+    def handleClose(self, reason = None):
         self.stopHeartbeat()
         self._sessionId = None
         self._connected = False
@@ -82,24 +91,9 @@ class Session:
         if(isinstance(data, str)):
             data = data.decode('utf-8')
         return json.loads(data)
-        
 
-    async def close(self, code=4000):
-        if self._keep_alive:
-            self._keep_alive.stop()
-            self._keep_alive = None
-
-        self._close_code = code
-        await self.socket.close(code=code)
-
-    async def send(self, data):
-        self._dispatch('socket_raw_send', data)
-        await self._ws.send_str(data)
-
-
-
-	async def handleMessage(self, event):
-		msg = event.get("data")
+    def handleMessage(self, event):
+        msg = event.get("data")
 
         if type(msg) is bytes:
             self._buffer.extend(msg)
@@ -108,7 +102,7 @@ class Session:
                 if msg[-4:] == b'\x00\x00\xff\xff':
                     msg = zlib.decompressobj().decompress(self._buffer)
                     self._buffer = bytearray()
-        
+
         try:
             packet = self.unpack(msg)
         except Exception as e:
@@ -117,8 +111,7 @@ class Session:
         self.handlePacket(packet)
 
 
-
-    async def handlePacket(self, data):
+    def handlePacket(self, data):
         op = data.get("op")
         if op == GatewayOp.DISPATCH:
             self._emitter.emit(data.get('e'), data)
@@ -146,7 +139,7 @@ class Session:
         self._heartbeatTimer = Timer(self._heartbeatInterval, self.heartbeat)
 
     def stopHeartbeat(self):
-        if (self._heartbeatTimer):
+        if self._heartbeatTimer:
             self._heartbeatTimer.cancel()
             self._heartbeatTimer = None
-
+            
