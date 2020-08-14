@@ -62,9 +62,11 @@ class WS:
             self._close(reason)
 
     def send(self, data):
+        print(type(data))
         if self.state != WSState.OPEN:
             return
         if self._ws is not None:
+            print(json.dumps(data))
             self._ws.send(json.dumps(data))
 
     def url(self):
@@ -141,7 +143,6 @@ class WS:
     def _onMessage(self):
         def onMessageFunc(ws, data):
             if self.onMessage is not None:
-                print(json.loads(data))
                 self.onMessage(json.loads(data))
 
         return onMessageFunc

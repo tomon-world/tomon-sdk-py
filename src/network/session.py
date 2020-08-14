@@ -3,9 +3,9 @@ from . import ws
 import json
 import enum
 import zlib
+from threading import Timer
 
-
-class GatewayOp(enum.Enum):
+class GatewayOp:
     DISPATCH = 0
     HEARTBEAT = 1
     IDENTIFY = 2
@@ -15,11 +15,11 @@ class GatewayOp(enum.Enum):
 
 
 class Session(Observable):
-    # BASE_WS = 'wss://gateway.tomon.co/'
-    BASE_WS = 'wss://echo.websocket.org/'
+    BASE_WS = 'wss://gateway.tomon.co/'
+    #BASE_WS = 'wss://echo.websocket.org/'
 
     def __init__(self, zlib=False):
-        self._zlib = False
+        self._zlib = zlib
         if self._zlib:
             self._url = self.BASE_WS + 'compress=zlib-stream'
         else:
@@ -61,7 +61,7 @@ class Session(Observable):
         self._ws.close(reason)
 
     def send(self, op, d=None):
-        self._ws.send({op, d})
+        self._ws.send({"op":op, "d":d})
 
     def state(self):
         return self._ws.state
@@ -75,7 +75,6 @@ class Session(Observable):
     def handleOpen(self):
         self._connected = True
         # import pdb; pdb.set_trace()
-        print(self.emit)
         self.emit('NETWORK_CONNECTED')
 
     def handleClose(self, reason=None):
@@ -86,13 +85,16 @@ class Session(Observable):
         self.emit('NETWORK_DISCONNECTED')
 
     def unpack(self, data):
+
         if (isinstance(data, str)):
-            data = data.decode('utf-8')
+            data = data.decode(encoding='UTF-8')
+
+
         return json.loads(data)
 
     def handleMessage(self, event):
-        msg = event.get("d")
-
+        msg = event
+        print(msg)
         if type(msg) is bytes:
             self._buffer.extend(msg)
 
@@ -100,12 +102,13 @@ class Session(Observable):
                 if msg[-4:] == b'\x00\x00\xff\xff':
                     msg = zlib.decompressobj().decompress(self._buffer)
                     self._buffer = bytearray()
-        packet = None
-        try:
-            packet = self.unpack(msg)
-        except Exception as e:
-            print(e)
-        self.handlePacket(packet)
+
+            
+            try:
+                msg = self.unpack(msg)
+            except Exception as e:
+                print(e)
+        self.handlePacket(msg)
 
     def handlePacket(self, data):
         op = data.get("op")
@@ -120,18 +123,20 @@ class Session(Observable):
             self._sessionId = data.get('d').get('session_id')
             self.heartbeat()
             self.emit('HELLO', data)
-            self.send(GatewayOp.IDENTIFY, {
-                token: self.token
-            })
+            self.send(GatewayOp.IDENTIFY, d={"token":self.token}
+              
+            )
         elif op == GatewayOp.HEARTBEAT:
             self.send(GatewayOp.HEARTBEAT_ACK)
         elif op == GatewayOp.HEARTBEAT_ACK:
+            print(data)
             self.emit('HEARTBEAT_ACK')
 
     def heartbeat(self):
-        self.emit('HEARTBEAT')
-        self.send(GatewayOp.HEARTBEAT)
-        self._heartbeatTimer = Timer(self._heartbeatInterval, self.heartbeat)
+        def startHeartbeat():
+            self.emit('HEARTBEAT')
+            self.send(GatewayOp.HEARTBEAT)
+        self._heartbeatTimer = Timer(self._heartbeatInterval, startHeartbeat)
 
     def stopHeartbeat(self):
         if self._heartbeatTimer:

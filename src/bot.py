@@ -85,9 +85,13 @@ class Bot(Observable):
         except Exception as e:
             print("❌ Authentication failed. Please check your identity.")
         
+
+        # self.once ('READY', print)
         self.session().open()
         
         print("🚢 Connecting...")
+
+
 
         self.once('READY', self.ready_test(self._name, self._username, self._discriminator))
 
