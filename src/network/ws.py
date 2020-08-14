@@ -73,7 +73,7 @@ class WS:
         return self._reconnecting
 
     def _connect(self, url: str):
-        websocket.enableTrace(True)
+        websocket.enableTrace(False)
         self.state = WSState.CONNECTING
 
         self._ws = websocket.WebSocketApp(url, on_open=self._onOpen(), on_close=self._onClose(),

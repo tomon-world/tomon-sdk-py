@@ -7,13 +7,24 @@ import asyncio
 from .network import session
 import pdb
 
+
+class OpCodeEvent:
+    DISPATCH = 'DISPATCH'
+    HEARTBEAT = 'HEARTBEAT'
+    READY = 'READY'
+    # IDENTIFY = 'IDENTIFY'1
+    HELLO = 'HELLO'
+    # HEARTBEAT_ACK = 'HEARTBEAT_ACK'
+    # VOICE_STATE_UPDATE = 'VOICE_STATE_UPDATE'
+
+
 class Bot(Observable):
 
     def __init__(self):
-
+        super().__init__()
         self._route = None
         self._token = None
-        self._session = session.Session(zlib = True)
+        self._session = session.Session(zlib=True)
         self._id = None
         self._name = None
         self._username = None
@@ -22,7 +33,7 @@ class Bot(Observable):
     def route(self, path, token=None):
         self._route = route.Route(path, token)
         return self._route
-    
+
     def token(self):
         return self._token
 
@@ -69,7 +80,7 @@ class Bot(Observable):
             credencials['password'] = kwargs['password']
         print('⏳ Start authenticating...')
         try:
-            #pdb.set_trace()
+            # pdb.set_trace()
             info = await self.route(path='/auth/login', token=None).post(data=credencials, auth=False)
             self._token = info.get('token')
             self._session.token = info.get('token')
@@ -77,26 +88,22 @@ class Bot(Observable):
             self._name = info.get('name')
             self._username = info.get('username')
             self._discriminator = info.get('discriminator')
-            
+
             print("🎫 Bot {}({}#{}) is authenticated.".format(
                 info.get('name'), info.get('username'), info.get('discriminator')))
 
         except Exception as e:
             print("❌ Authentication failed. Please check your identity.")
-        
+            return
 
-        # self.once ('READY', print)
-        self.session().open() 
+            # self.once ('READY', print)
         print("🚢 Connecting...")
 
-
-
         self.once('READY', self.ready_test(self._name, self._username, self._discriminator))
+        self.session().open()
+
     async def start(self, token):
         return await self._start({'token': token})
 
     async def startWithPassword(self, fullname, password):
         return await self._start(full_name=fullname, password=password)
-    
-    
-    

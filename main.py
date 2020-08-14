@@ -1,16 +1,35 @@
 from src import bot
+from src.model import *
 from src.network import http
 import asyncio
+import marshmallow_dataclass
+from marshmallow_dataclass import dataclass
+
 import pdb
 
+
+def onDispatch(data):
+    e = data.get('e')
+    d = data.get('d')
+    if e == 'USER_TYPING':
+        typingschema = marshmallow_dataclass.class_schema(UserTyping)
+        typing: UserTyping = typingschema().load(d)
+        print(typing)
+        return
+    if e == 'USER_PRESENCE_UPDATE':
+        presenceschema = marshmallow_dataclass.class_schema(Presence)
+        p: Presence = presenceschema().load(d)
+        print(p)
+
+
 if __name__ == "__main__":
-    bot = bot.Bot()
+    bot_app = bot.Bot()
     http = http.HTTPClient()
 
 
     async def main():
-        result = await bot.startWithPassword('xiao#8050', 'Troph2019$')
-        await asyncio.sleep(20)
+        bot_app.on(bot.OpCodeEvent.DISPATCH, onDispatch)
+        await bot_app.startWithPassword('KZHIWEI#7479', 'A66871068a')
 
         ## ------- Test Case -----------##
 
