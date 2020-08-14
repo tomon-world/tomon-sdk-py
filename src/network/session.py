@@ -5,6 +5,7 @@ import enum
 import zlib
 from threading import Timer
 
+
 class GatewayOp:
     DISPATCH = 0
     HEARTBEAT = 1
@@ -16,12 +17,13 @@ class GatewayOp:
 
 class Session(Observable):
     BASE_WS = 'wss://gateway.tomon.co/'
-    #BASE_WS = 'wss://echo.websocket.org/'
+
+    # BASE_WS = 'wss://echo.websocket.org/'
 
     def __init__(self, zlib=False):
         self._zlib = zlib
         if self._zlib:
-            self._url = self.BASE_WS + 'compress=zlib-stream'
+            self._url = self.BASE_WS + '?compress=zlib-stream'
         else:
             self._url = self.BASE_WS
         # self = Observable
@@ -61,7 +63,7 @@ class Session(Observable):
         self._ws.close(reason)
 
     def send(self, op, d=None):
-        self._ws.send({"op":op, "d":d})
+        self._ws.send({"op": op, "d": d})
 
     def state(self):
         return self._ws.state
@@ -89,26 +91,23 @@ class Session(Observable):
         if (isinstance(data, str)):
             data = data.decode(encoding='UTF-8')
 
-
         return json.loads(data)
 
     def handleMessage(self, event):
         msg = event
-        print(msg)
         if type(msg) is bytes:
             self._buffer.extend(msg)
-
             if len(msg) >= 4:
                 if msg[-4:] == b'\x00\x00\xff\xff':
                     msg = zlib.decompressobj().decompress(self._buffer)
+                    msg = msg.decode(encoding='UTF-8')
                     self._buffer = bytearray()
 
-            
-            try:
-                msg = self.unpack(msg)
-            except Exception as e:
-                print(e)
-        self.handlePacket(msg)
+            # try:
+            #     msg = self.unpack(msg)
+            # except Exception as e:
+            #     print(e)
+        self.handlePacket(json.loads(msg))
 
     def handlePacket(self, data):
         op = data.get("op")
@@ -123,9 +122,9 @@ class Session(Observable):
             self._sessionId = data.get('d').get('session_id')
             self.heartbeat()
             self.emit('HELLO', data)
-            self.send(GatewayOp.IDENTIFY, d={"token":self.token}
-              
-            )
+            self.send(GatewayOp.IDENTIFY, d={"token": self.token}
+
+                      )
         elif op == GatewayOp.HEARTBEAT:
             self.send(GatewayOp.HEARTBEAT_ACK)
         elif op == GatewayOp.HEARTBEAT_ACK:
@@ -136,6 +135,7 @@ class Session(Observable):
         def startHeartbeat():
             self.emit('HEARTBEAT')
             self.send(GatewayOp.HEARTBEAT)
+
         self._heartbeatTimer = Timer(self._heartbeatInterval, startHeartbeat)
 
     def stopHeartbeat(self):

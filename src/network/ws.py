@@ -78,8 +78,10 @@ class WS:
     def _connect(self, url: str):
         websocket.enableTrace(True)
         self.state = WSState.CONNECTING
+
         self._ws = websocket.WebSocketApp(url, on_open=self._onOpen(), on_close=self._onClose(),
                                           on_error=self._onError(),
+
                                           on_message=self._onMessage())
         self._ws.run_forever()
         # self._ws.close()
@@ -143,7 +145,8 @@ class WS:
     def _onMessage(self):
         def onMessageFunc(ws, data):
             if self.onMessage is not None:
-                self.onMessage(json.loads(data))
+                self.onMessage(data)
+                # self.onMessage(json.loads(data))
 
         return onMessageFunc
 
