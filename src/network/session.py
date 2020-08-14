@@ -4,6 +4,7 @@ import json
 import enum
 import zlib
 
+
 class GatewayOp(enum.Enum):
     DISPATCH = 0
     HEARTBEAT = 1
@@ -12,18 +13,19 @@ class GatewayOp(enum.Enum):
     HEARTBEAT_ACK = 4
     VOICE_STATE_UPDATE = 5
 
+
 class Session(Observable):
+    # BASE_WS = 'wss://gateway.tomon.co/'
+    BASE_WS = 'wss://echo.websocket.org/'
 
-    BASE_WS = 'wss://gateway.tomon.co/'
-
-    def __init__(self, zlib = False):
-        self._zlib = zlib
+    def __init__(self, zlib=False):
+        self._zlib = False
         if self._zlib:
             self._url = self.BASE_WS + 'compress=zlib-stream'
         else:
             self._url = self.BASE_WS
         # self = Observable
-        
+
         self._heartbeatTimer = None
         self._heartbeatInternal = 40000
 
@@ -34,14 +36,11 @@ class Session(Observable):
         self._sessionId = None
         self.token = None;
         self._buffer = bytearray()
-          
-        #???   what is this
+
         self._ws.onOpen = self.handleOpen
-        self._ws.onClose = self.handleClose  
+        self._ws.onClose = self.handleClose
         self._ws.onMessage = self.handleMessage
         self._ws.onReconnect = self.emit('NETWORK_RECONNECTING')
-        # self.emit('NETWORK_RECONNECTING', self._ws.onReconnect)
-
 
     def emit(self, event, *args):
         return super().emitter.emit(event, *args)
@@ -54,14 +53,14 @@ class Session(Observable):
 
     def once(self, event, listener):
         return super().emitter.once(event, listener)
-    
+
     def open(self):
         self._ws.open(self._url)
 
-    def close(self, reason = None):
+    def close(self, reason=None):
         self._ws.close(reason)
 
-    def send(self, op, d= None):
+    def send(self, op, d=None):
         self._ws.send({op, d})
 
     def state(self):
@@ -79,21 +78,20 @@ class Session(Observable):
         print(self.emit)
         self.emit('NETWORK_CONNECTED')
 
-    def handleClose(self, reason = None):
+    def handleClose(self, reason=None):
         self.stopHeartbeat()
         self._sessionId = None
         self._connected = False
         self._ready = False
         self.emit('NETWORK_DISCONNECTED')
 
-
     def unpack(self, data):
-        if(isinstance(data, str)):
+        if (isinstance(data, str)):
             data = data.decode('utf-8')
         return json.loads(data)
 
     def handleMessage(self, event):
-        msg = event.get("data")
+        msg = event.get("d")
 
         if type(msg) is bytes:
             self._buffer.extend(msg)
@@ -102,14 +100,12 @@ class Session(Observable):
                 if msg[-4:] == b'\x00\x00\xff\xff':
                     msg = zlib.decompressobj().decompress(self._buffer)
                     self._buffer = bytearray()
-
+        packet = None
         try:
             packet = self.unpack(msg)
         except Exception as e:
             print(e)
-
         self.handlePacket(packet)
-
 
     def handlePacket(self, data):
         op = data.get("op")
@@ -126,12 +122,11 @@ class Session(Observable):
             self.emit('HELLO', data)
             self.send(GatewayOp.IDENTIFY, {
                 token: self.token
-                })
+            })
         elif op == GatewayOp.HEARTBEAT:
             self.send(GatewayOp.HEARTBEAT_ACK)
-        elif op == GatewayOp.HEARTBEAT_ACK: 
+        elif op == GatewayOp.HEARTBEAT_ACK:
             self.emit('HEARTBEAT_ACK')
-    
 
     def heartbeat(self):
         self.emit('HEARTBEAT')
@@ -142,4 +137,3 @@ class Session(Observable):
         if self._heartbeatTimer:
             self._heartbeatTimer.cancel()
             self._heartbeatTimer = None
-            
