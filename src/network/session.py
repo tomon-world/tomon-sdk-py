@@ -103,10 +103,6 @@ class Session(Observable):
                     msg = msg.decode(encoding='UTF-8')
                     self._buffer = bytearray()
 
-            # try:
-            #     msg = self.unpack(msg)
-            # except Exception as e:
-            #     print(e)
         self.handlePacket(json.loads(msg))
 
     def handlePacket(self, data):
@@ -122,13 +118,10 @@ class Session(Observable):
             self._sessionId = data.get('d').get('session_id')
             self.heartbeat()
             self.emit('HELLO', data)
-            self.send(GatewayOp.IDENTIFY, d={"token": self.token}
-
-                      )
+            self.send(GatewayOp.IDENTIFY, d={"token": self.token})
         elif op == GatewayOp.HEARTBEAT:
             self.send(GatewayOp.HEARTBEAT_ACK)
         elif op == GatewayOp.HEARTBEAT_ACK:
-            print(data)
             self.emit('HEARTBEAT_ACK')
 
     def heartbeat(self):

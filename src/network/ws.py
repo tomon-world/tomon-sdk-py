@@ -51,7 +51,6 @@ class WS:
         self.onMessage = None
 
     def open(self, url: str):
-        print(url)
         if self.state != WSState.CLOSED:
             return
         self._connect(url)
@@ -62,11 +61,9 @@ class WS:
             self._close(reason)
 
     def send(self, data):
-        print(type(data))
         if self.state != WSState.OPEN:
             return
         if self._ws is not None:
-            print(json.dumps(data))
             self._ws.send(json.dumps(data))
 
     def url(self):
@@ -84,7 +81,6 @@ class WS:
 
                                           on_message=self._onMessage())
         self._ws.run_forever()
-        # self._ws.close()
 
     def _reconnect(self, url: str):
         if self._reconnectTimer is not None:
