@@ -37,11 +37,15 @@ class Route:
                 if len(arg['files']) == 1:
                     filepath = arg['files'][0]
                     filename = os.path.basename(filepath)
-                    payload.add_field('file', open(filepath, 'rb'), filename = filename)
-
-                    if 'data' in arg:
+                    payload.add_field('file', open(filepath, 'rb'), filename = filename)              
+                else: 
+                    for index, file in enumerate(list(arg['files'])):
+                        print
+                        payload.add_field('file'+str(index), open(file,'rb'), filename = os.path.basename(file)) 
+                
+                if 'data' in arg:
                         payload.add_field('payload_json', json.dumps(arg['data']))
-
+    
         try:
             async with aiohttp.request(method=method, url=url, data=payload, headers = headers) as r:
                 if 300 > r.status >= 200:
