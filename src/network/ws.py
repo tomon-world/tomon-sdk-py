@@ -52,10 +52,10 @@ class WS:
             return
         self._connect(url)
 
-    def close(self, code: int, reason: str):
+    def close(self, reason: str):
         if self.state != WSState.CLOSED:
             self._reconnecting = False
-            self._close(code, reason)
+            self._close(reason)
 
     def send(self, data):
         # if self.state != WSState.OPEN:
@@ -71,8 +71,8 @@ class WS:
 
     def _connect(self, url: str):
         websocket.enableTrace(True)
-        self._ws = websocket.WebSocketApp(url, on_open=self._onOpen, on_close=self.onClose, on_error=self.onError,
-                                          on_message=self.onMessage)
+        self._ws = websocket.WebSocketApp(url, on_open=self._onOpen, on_close=self._onClose, on_error=self._onError,
+                                          on_message=self._onMessage)
 
     def _reconnect(self, url: str):
         if self._reconnectTimer is not None:
@@ -88,9 +88,9 @@ class WS:
 
         self._reconnectTimer = Timer(self.retryDelay(self._retryCount), retryFunc),
 
-    def _close(self, code: int, reason: str):
+    def _close(self, reason: str):
         if self._ws is not None:
-            self._ws.close(reason=reason, status=code)
+            self._ws.close(reason=reason)
 
     def _stopReconnect(self):
         if self._reconnectTimer is not None:

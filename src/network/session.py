@@ -58,8 +58,8 @@ class Session(Observable):
     def open(self):
         self._ws.open(self._url)
 
-    def close(self, code = None, reason = None):
-        self._ws.close(code, reason)
+    def close(self, reason = None):
+        self._ws.close(reason)
 
     def send(self, op, d= None):
         self._ws.send({op, d})
