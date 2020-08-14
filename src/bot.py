@@ -73,6 +73,7 @@ class Bot(Observable):
             info = await self.route(path='/auth/login', token=None).post(data=credencials, auth=False)
             self._token = info.get('token')
             self._session.token = info.get('token')
+            print(self._session.token)
             self._id = info.get('id')
             self._name = info.get('name')
             self._username = info.get('username')
@@ -85,10 +86,12 @@ class Bot(Observable):
             print("❌ Authentication failed. Please check your identity.")
         
         self.session().open()
+        
         print("🚢 Connecting...")
 
         self.once('READY', self.ready_test(self._name, self._username, self._discriminator))
 
+        self.session().close()
     async def start(self, token):
         return await self._start({'token': token})
 

@@ -2,7 +2,9 @@ from enum import Enum
 import websocket
 import json
 from threading import Timer
+import time
 
+import pdb
 try:
     import thread
 except ImportError:
@@ -48,6 +50,7 @@ class WS:
         self.onMessage = None
 
     def open(self, url: str):
+        print(self.state)
         if self.state != WSState.CLOSED:
             return
         self._connect(url)
@@ -71,8 +74,10 @@ class WS:
 
     def _connect(self, url: str):
         websocket.enableTrace(True)
+        # pdb.set_trace()
         self._ws = websocket.WebSocketApp(url, on_open=self._onOpen, on_close=self._onClose, on_error=self._onError,
                                           on_message=self._onMessage)
+        # self._ws.close()
 
     def _reconnect(self, url: str):
         if self._reconnectTimer is not None:
@@ -98,6 +103,13 @@ class WS:
             self._reconnectTimer = None
 
     def _onOpen(self, ws):
+        token ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNDQ1NjcwMzUzMjk5NDU2MCIsImlhdCI6MTU5NzM4NDI4MH0.B9_iVaLdQZXHlKZV_S7wtjZw9kFWsVIMN0KbG1iVtck'
+        time.sleep(4)
+        self._ws.send(json.dumps({
+
+            "d":{"token": token},
+            "op": 2
+        }))
         self._retryCount = 0
         self._reconnecting = False
         self._stopReconnect()

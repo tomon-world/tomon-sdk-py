@@ -14,7 +14,8 @@ class GatewayOp(enum.Enum):
 
 class Session(Observable):
 
-    BASE_WS = 'wss://gateway.tomon.co/'
+    # BASE_WS = 'wss://gateway.tomon.co/'
+    BASE_WS = 'wss://localhost:3002/'
 
     def __init__(self, zlib = False):
         self._zlib = zlib
@@ -35,12 +36,10 @@ class Session(Observable):
         self.token = None;
         self._buffer = bytearray()
           
-        #???   what is this
         self._ws.onOpen = self.handleOpen
         self._ws.onClose = self.handleClose  
         self._ws.onMessage = self.handleMessage
         self._ws.onReconnect = self.emit('NETWORK_RECONNECTING')
-        # self.emit('NETWORK_RECONNECTING', self._ws.onReconnect)
 
 
     def emit(self, event, *args):
