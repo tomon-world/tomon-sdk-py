@@ -22,7 +22,7 @@ class Session(Observable):
             self._url = self.BASE_WS + 'compress=zlib-stream'
         else:
             self._url = self.BASE_WS
-        # self._emitter = Observable
+        # self = Observable
         
         self._heartbeatTimer = None
         self._heartbeatInternal = 40000
@@ -39,8 +39,8 @@ class Session(Observable):
         self._ws.onOpen = self.handleOpen
         self._ws.onClose = self.handleClose  
         self._ws.onMessage = self.handleMessage
-        self._ws.onReconnect = self._emitter.emit('NETWORK_RECONNECTING')
-        # self._emitter.emit('NETWORK_RECONNECTING', self._ws.onReconnect)
+        self._ws.onReconnect = self.emit('NETWORK_RECONNECTING')
+        # self.emit('NETWORK_RECONNECTING', self._ws.onReconnect)
 
 
     def emit(self, event, *args):
@@ -84,7 +84,7 @@ class Session(Observable):
         self._sessionId = None
         self._connected = False
         self._ready = False
-        self._emitter.emit('NETWORK_DISCONNECTED')
+        self.emit('NETWORK_DISCONNECTED')
 
 
     def unpack(self, data):
@@ -114,27 +114,27 @@ class Session(Observable):
     def handlePacket(self, data):
         op = data.get("op")
         if op == GatewayOp.DISPATCH:
-            self._emitter.emit(data.get('e'), data)
-            self._emitter.emit('DISPATCH', data)
+            self.emit(data.get('e'), data)
+            self.emit('DISPATCH', data)
         elif op == GatewayOp.IDENTIFY:
             self._ready = True
-            self._emitter.emit('READY', data)
+            self.emit('READY', data)
         elif op == GatewayOp.HELLO:
             self._heartbeatInterval = data.get('d').get('heartbeat_interval')
             self._sessionId = data.get('d').get('session_id')
             self.heartbeat()
-            self._emitter.emit('HELLO', data)
+            self.emit('HELLO', data)
             self.send(GatewayOp.IDENTIFY, {
                 token: self.token
                 })
         elif op == GatewayOp.HEARTBEAT:
             self.send(GatewayOp.HEARTBEAT_ACK)
         elif op == GatewayOp.HEARTBEAT_ACK: 
-            self._emitter.emit('HEARTBEAT_ACK')
+            self.emit('HEARTBEAT_ACK')
     
 
     def heartbeat(self):
-        self._emitter.emit('HEARTBEAT')
+        self.emit('HEARTBEAT')
         self.send(GatewayOp.HEARTBEAT)
         self._heartbeatTimer = Timer(self._heartbeatInterval, self.heartbeat)
 

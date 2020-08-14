@@ -13,7 +13,7 @@ class Bot(Observable):
 
         self._route = None
         self._token = None
-        # self._session = session.Session(zlib = True)
+        self._session = session.Session(zlib = True)
         self._id = None
         self._name = None
         self._username = None
@@ -72,7 +72,7 @@ class Bot(Observable):
             #pdb.set_trace()
             info = await self.route(path='/auth/login', token=None).post(data=credencials, auth=False)
             self._token = info.get('token')
-            # self._session.token = info.get('token')
+            self._session.token = info.get('token')
             self._id = info.get('id')
             self._name = info.get('name')
             self._username = info.get('username')
@@ -84,7 +84,7 @@ class Bot(Observable):
         except Exception as e:
             print("❌ Authentication failed. Please check your identity.")
         
-        # self.session().open()
+        self.session().open()
         print("🚢 Connecting...")
 
         self.once('READY', self.ready_test(self._name, self._username, self._discriminator))
