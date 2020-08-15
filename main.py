@@ -20,6 +20,8 @@ def onDispatch(data):
         presenceschema = marshmallow_dataclass.class_schema(Presence)
         p: Presence = presenceschema().load(d)
         print(p)
+    if e == 'MESSAGE_CREATE':
+        print(d)
 
 
 if __name__ == "__main__":

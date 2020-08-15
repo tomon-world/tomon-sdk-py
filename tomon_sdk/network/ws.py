@@ -1,15 +1,7 @@
 from enum import Enum
-import websocket
 import json
 from threading import Timer
-import time
-
-import pdb
-
-try:
-    import thread
-except ImportError:
-    import _thread as thread
+from ws4py.client.threadedclient import WebSocketClient
 
 
 class WSState(Enum):
@@ -21,6 +13,32 @@ class WSState(Enum):
 
 
 class WS:
+    class _Client(WebSocketClient):
+        def __init__(self, url, protocols=None, extensions=None, heartbeat_freq=None,
+                     ssl_options=None, headers=None, exclude_headers=None):
+            super().__init__(url, protocols=None, extensions=None, heartbeat_freq=None, ssl_options=None, headers=None,
+                             exclude_headers=None)
+            self.onOpen = None
+            self.onClose = None
+            self.onError = None
+            self.onMessage = None
+
+        def opened(self):
+            if self.onOpen is not None:
+                self.onOpen()
+
+        def closed(self, code, reason=None):
+            print(code, reason)
+            if self.onClose is not None:
+                self.onClose(code, reason=None)
+
+        def received_message(self, m):
+            if self.onMessage is not None:
+                self.onMessage(m.data)
+
+        def unhandled_error(self, error):
+            if self.onError is not None:
+                self.onError(error)
 
     @staticmethod
     def retryDelay(times: int) -> int:
@@ -36,7 +54,6 @@ class WS:
             return 100000
 
     def __init__(self):
-        # websocket.enableTrace(True)
         self._ws = None
         self._retryCount = 0
         self._reconnecting = False
@@ -55,10 +72,10 @@ class WS:
             return
         self._connect(url)
 
-    def close(self, reason: str):
+    def close(self, code: int, reason=None):
         if self.state != WSState.CLOSED:
             self._reconnecting = False
-            self._close(reason)
+            self._close(code, reason)
 
     def send(self, data):
         if self.state != WSState.OPEN:
@@ -73,20 +90,19 @@ class WS:
         return self._reconnecting
 
     def _connect(self, url: str):
-        websocket.enableTrace(False)
         self.state = WSState.CONNECTING
-
-        self._ws = websocket.WebSocketApp(url, on_open=self._onOpen(), on_close=self._onClose(),
-                                          on_error=self._onError(),
-
-                                          on_message=self._onMessage())
+        self._ws = self._Client(url)
+        self._ws.onError = self._onError()
+        self._ws.onOpen = self._onOpen()
+        self._ws.onError = self._onError()
+        self._ws.onMessage = self._onMessage()
+        self._ws.connect()
         self._ws.run_forever()
 
     def _reconnect(self, url: str):
         if self._reconnectTimer is not None:
             self._reconnectTimer.cancel()
         self._reconnecting = True
-        self._connectError = None
 
         def retryFunc():
             self._retryCount += 1
@@ -97,10 +113,10 @@ class WS:
         self.state = WSState.RECONNECTING
         self._reconnectTimer = Timer(self.retryDelay(self._retryCount), retryFunc),
 
-    def _close(self, reason: str):
+    def _close(self, code: int, reason=None):
         if self._ws is not None:
             self.state = WSState.CLOSED
-            self._ws.close(reason=reason)
+            self._ws.close(code, reason)
 
     def _stopReconnect(self):
         if self._reconnectTimer is not None:
@@ -108,15 +124,8 @@ class WS:
             self._reconnectTimer = None
 
     def _onOpen(self):
-        def onOpenFunc(ws):
+        def onOpenFunc():
             self.state = WSState.OPEN
-            token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNDQ1NjcwMzUzMjk5NDU2MCIsImlhdCI6MTU5NzM4NDI4MH0.B9_iVaLdQZXHlKZV_S7wtjZw9kFWsVIMN0KbG1iVtck'
-            time.sleep(4)
-            self._ws.send(json.dumps({
-
-                "d": {"token": token},
-                "op": 2
-            }))
             self._retryCount = 0
             self._reconnecting = False
             self._stopReconnect()
@@ -126,30 +135,33 @@ class WS:
         return onOpenFunc
 
     def _onClose(self):
-        def onCloseFunc(ws):
-            self.state = WSState.CLOSING
-            if self._connectError is None:
+        def onCloseFunc(code: int, reason=None):
+            self.state = WSState.CLOSED
+            message = None
+            if reason is not None:
+                try:
+                    data = json.loads(reason)
+                    message = data
+                except Exception as e:
+                    message = reason
+            if code == 1006:
                 self._reconnect(self.url())
-                if self.onClose is not None:
-                    self.onClose()
-            else:
-                if self.onClose is not None:
-                    self.onClose(reason=str(self._connectError))
+            if self.onClose is not None:
+                self.onClose(code, message)
 
         return onCloseFunc
 
     def _onMessage(self):
-        def onMessageFunc(ws, data):
+        def onMessageFunc(data):
             if self.onMessage is not None:
                 self.onMessage(data)
-                # self.onMessage(json.loads(data))
 
         return onMessageFunc
 
     def _onError(self):
-        def onErrorFunc(ws, error):
+        def onErrorFunc(error):
             self._connectError = error
             if self.onError is not None:
-                self.onError(message=str(error))
+                self.onError(error)
 
         return onErrorFunc

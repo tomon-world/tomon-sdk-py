@@ -64,7 +64,10 @@ class Bot(Observable):
     def once(self, event, listener):
         return super().emitter.once(event, listener)
 
-    def ready_test(self, name, username, discriminator):
+    def ready_test(self, data):
+        name = self.name()
+        username = self.username()
+        discriminator = self.discriminator()
         print("🤖️ Bot {}({}#{}) is ready to work!".format(
             name, username, discriminator))
 
@@ -99,7 +102,7 @@ class Bot(Observable):
             # self.once ('READY', print)
         print("🚢 Connecting...")
 
-        self.once('READY', self.ready_test(self._name, self._username, self._discriminator))
+        self.once('READY', self.ready_test)
         self.session().open()
 
     async def start(self, token):
