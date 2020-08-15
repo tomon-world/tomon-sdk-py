@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tomon_sdk",  # Replace with your own username
-    version="0.1.0",
+    version="0.1.3",
     author="Tomon Team",
     author_email="qiang.l.x@gmail.com",
     description="A simple development kit for Tomon bot.",
@@ -14,8 +14,9 @@ setuptools.setup(
     keywords=['TOMON'],
     install_requires=[            # I get to this in a second
         'aiohttp',
-        'websocket-client',
         'node-events',
+        'ws4py',
+        'zlib'
     ],
     classifiers=[
         "Development Status :: 3 - Alpha",

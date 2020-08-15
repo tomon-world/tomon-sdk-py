@@ -1,7 +1,7 @@
 import json
 import aiohttp
 from .utils.observable import Observable
-from .network import route
+from .network import api
 import asyncio
 # from events import EventType
 from .network import session
@@ -25,20 +25,20 @@ class Bot(Observable):
         self._route = None
         self._token = None
         self._session = session.Session(zlib=True)
+        self._api = api.Api()
         self._id = None
         self._name = None
         self._username = None
         self._discriminator = None
-
-    def route(self, path, token=None):
-        self._route = route.Route(path, token)
-        return self._route
 
     def token(self):
         return self._token
 
     def session(self):
         return self._session
+
+    def api(self):
+        return self._api
 
     def id(self):
         return self._id
@@ -84,9 +84,10 @@ class Bot(Observable):
         print('⏳ Start authenticating...')
         try:
             # pdb.set_trace()
-            info = await self.route(path='/auth/login', token=None).post(data=credencials, auth=False)
+            info = await self.api().route(path='/auth/login').post(data=credencials, auth=False)
             self._token = info.get('token')
             self._session.token = info.get('token')
+            self._api.setToken(info.get('token'))
             self._id = info.get('id')
             self._name = info.get('name')
             self._username = info.get('username')
@@ -106,7 +107,7 @@ class Bot(Observable):
         self.session().open()
 
     async def start(self, token):
-        return await self._start({'token': token})
+        return await self._start(token=token)
 
-    async def startWithPassword(self, fullname, password):
+    async def start_with_password(self, fullname, password):
         return await self._start(full_name=fullname, password=password)

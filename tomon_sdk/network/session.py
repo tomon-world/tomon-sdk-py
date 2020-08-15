@@ -1,10 +1,6 @@
-import marshmallow_dataclass
-
-from ..model import Ready
 from ..utils.observable import Observable
 from . import ws
 import json
-import enum
 import zlib as zb
 from threading import Timer
 
@@ -21,8 +17,6 @@ class GatewayOp:
 class Session(Observable):
     BASE_WS = 'wss://gateway.tomon.co/'
 
-    # BASE_WS = 'wss://echo.websocket.org/'
-
     def __init__(self, zlib=False):
         super().__init__()
         self._zlib = zlib
@@ -30,7 +24,6 @@ class Session(Observable):
             self._url = self.BASE_WS + '?compress=zlib-stream'
         else:
             self._url = self.BASE_WS
-        # self = Observable
 
         self._heartbeatTimer = None
         self._heartbeatInterval = None
@@ -40,7 +33,7 @@ class Session(Observable):
         self._connected = False
 
         self._sessionId = None
-        self.token = None;
+        self.token = None
         self._buffer = bytearray()
 
         self._ws.onOpen = self.handleOpen
@@ -134,10 +127,12 @@ class Session(Observable):
         def startHeartbeat():
             self.emit('HEARTBEAT')
             self.send(GatewayOp.HEARTBEAT)
-            self._heartbeatTimer = Timer(self._heartbeatInterval / 1000, startHeartbeat)
+            self._heartbeatTimer = Timer(
+                self._heartbeatInterval / 1000, startHeartbeat)
             self._heartbeatTimer.start()
 
-        self._heartbeatTimer = Timer(self._heartbeatInterval / 1000, startHeartbeat)
+        self._heartbeatTimer = Timer(
+            self._heartbeatInterval / 1000, startHeartbeat)
         self._heartbeatTimer.start()
 
     def stopHeartbeat(self):

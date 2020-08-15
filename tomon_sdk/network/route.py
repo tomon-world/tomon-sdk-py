@@ -2,9 +2,9 @@ import aiohttp
 import json
 import os
 
+
 class Route:
     Base = "https://beta.tomon.co/api/v1"
-    #Base = "http://localhost/api/v1"
 
     def __init__(self, path, token):
 
@@ -23,35 +23,36 @@ class Route:
 
         headers = {}
         payload = {}
-        
+
         for arg in list(args):
-            if 'auth' in arg and arg['auth'] == True:
+            if not ('auth' in arg and arg['auth'] == False):
                 headers['authorization'] = self.auth()
 
             if 'data' in arg:
                 payload = arg['data']
-    
-         
+
             if 'files' in arg:
                 payload = aiohttp.FormData()
                 if len(arg['files']) == 1:
                     filepath = arg['files'][0]
                     filename = os.path.basename(filepath)
-                    payload.add_field('file', open(filepath, 'rb'), filename = filename)              
-                else: 
+                    payload.add_field('file', open(
+                        filepath, 'rb'), filename=filename)
+                else:
                     for index, file in enumerate(list(arg['files'])):
                         print
-                        payload.add_field('file'+str(index), open(file,'rb'), filename = os.path.basename(file)) 
-                
+                        payload.add_field(
+                            'file'+str(index), open(file, 'rb'), filename=os.path.basename(file))
+
                 if 'data' in arg:
-                        payload.add_field('payload_json', json.dumps(arg['data']))
-    
+                    payload.add_field('payload_json', json.dumps(arg['data']))
+
         try:
-            async with aiohttp.request(method=method, url=url, data=payload, headers = headers) as r:
+            async with aiohttp.request(method=method, url=url, data=payload, headers=headers) as r:
                 if 300 > r.status >= 200:
                     return await r.json()
                 elif (r.status == 404):
-                    print("Not Found") 
+                    print("Not Found")
                 elif (r.status == 403):
                     print("Forbidden")
                 else:
@@ -59,7 +60,6 @@ class Route:
 
         except Exception as e:
             print(e)
-
 
     async def post(self, **kwargs):
         return await self.request('POST', self.url, kwargs)
@@ -75,4 +75,3 @@ class Route:
 
     async def delete(self, **kwargs):
         return await self.request('DELETE', self.url, kwargs)
-

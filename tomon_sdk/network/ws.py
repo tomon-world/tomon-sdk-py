@@ -111,7 +111,8 @@ class WS:
                 self.onReconnect(count=self._retryCount)
 
         self.state = WSState.RECONNECTING
-        self._reconnectTimer = Timer(self.retryDelay(self._retryCount), retryFunc),
+        self._reconnectTimer = Timer(
+            self.retryDelay(self._retryCount), retryFunc),
 
     def _close(self, code: int, reason=None):
         if self._ws is not None:
