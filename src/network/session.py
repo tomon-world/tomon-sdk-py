@@ -5,7 +5,7 @@ from ..utils.observable import Observable
 from . import ws
 import json
 import enum
-import zlib
+import zlib as zb
 from threading import Timer
 
 
@@ -24,6 +24,7 @@ class Session(Observable):
     # BASE_WS = 'wss://echo.websocket.org/'
 
     def __init__(self, zlib=False):
+        super().__init__()
         self._zlib = zlib
         if self._zlib:
             self._url = self.BASE_WS + '?compress=zlib-stream'
@@ -104,7 +105,7 @@ class Session(Observable):
             self._buffer.extend(msg)
             if len(msg) >= 4:
                 if msg[-4:] == b'\x00\x00\xff\xff':
-                    msg = zlib.decompressobj().decompress(self._buffer)
+                    msg = zb.decompressobj().decompress(self._buffer)
                     msg = msg.decode(encoding='UTF-8')
                     self._buffer = bytearray()
 
@@ -133,8 +134,11 @@ class Session(Observable):
         def startHeartbeat():
             self.emit('HEARTBEAT')
             self.send(GatewayOp.HEARTBEAT)
+            self._heartbeatTimer = Timer(self._heartbeatInterval / 1000, startHeartbeat)
+            self._heartbeatTimer.start()
 
-        self._heartbeatTimer = Timer(self._heartbeatInterval, startHeartbeat)
+        self._heartbeatTimer = Timer(self._heartbeatInterval / 1000, startHeartbeat)
+        self._heartbeatTimer.start()
 
     def stopHeartbeat(self):
         if self._heartbeatTimer:

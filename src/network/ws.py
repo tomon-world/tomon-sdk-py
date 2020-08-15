@@ -28,6 +28,7 @@ class WS:
                 self.onOpen()
 
         def closed(self, code, reason=None):
+            print(code, reason)
             if self.onClose is not None:
                 self.onClose(code, reason=None)
 
