@@ -32,7 +32,7 @@ class Session(Observable):
         # self = Observable
 
         self._heartbeatTimer = None
-        self._heartbeatInternal = 40000
+        self._heartbeatInterval = None
 
         self._ws = ws.WS()
         self._ready = False
@@ -45,6 +45,7 @@ class Session(Observable):
         self._ws.onOpen = self.handleOpen
         self._ws.onClose = self.handleClose
         self._ws.onMessage = self.handleMessage
+        self._ws.onError = print
         self._ws.onReconnect = self.emit('NETWORK_RECONNECTING')
 
     def emit(self, event, *args):
@@ -83,6 +84,7 @@ class Session(Observable):
         self.emit('NETWORK_CONNECTED')
 
     def handleClose(self, reason=None):
+        print(reason)
         self.stopHeartbeat()
         self._sessionId = None
         self._connected = False
