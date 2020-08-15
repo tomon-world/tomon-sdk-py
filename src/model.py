@@ -9,147 +9,7 @@ import marshmallow.validate
 from marshmallow import Schema
 
 
-# @dataclasses.dataclass()
-# class User:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Guild:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class GuildPosition:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Overwrite:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Channel:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class ChannelPosition:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Role:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class RolePosition:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Message:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class GuildMember:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Emoji:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class MessageReaction:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class MessageReactionRemoveAll:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class VoiceState:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Presence:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class PartialPresence:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Ready:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Identity:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Logout:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Typing:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class UserGuildSettings:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Stamp:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class StampPack:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Embed:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class MessageForward:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class ForwardThumb:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class ForwardMessage:
-#     pass
-#
-#
-# @dataclasses.dataclass()
-# class Forward:
-#     pass
-#
-# 用户
-@dataclasses.dataclass()
+@dataclass
 class User:
     id: int = field()
     username: str = field()
@@ -161,7 +21,7 @@ class User:
 
 
 # 公会
-@dataclasses.dataclass()
+@dataclass
 class Guild:
     id: int = field()
     name: str = field()
@@ -176,26 +36,25 @@ class Guild:
     background: str = field()
     background_url: str = field()
     background_props: str = field()
-    channels: List['Channel'] = field()
-    roles: List['Role'] = field()
-    emojis: List['Emoji'] = field()
-    members: List['GuildMember'] = field()
-    voice_states: List['VoiceState'] = field()
-    presences: List['PartialPresence'] = field()
+    channels: List[Channel] = field(default_factory=list)
+    roles: List[Role] = field(default_factory=list)
+    emojis: List[Emoji] = field(default_factory=list)
+    members: List[GuildMember] = field(default_factory=list)
+    voice_states: List[VoiceState] = field(default_factory=list)
+    presences: List[PartialPresence] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
-class GPosition:
-    id: int = field()
-    position: int = field()
-
-
-@dataclasses.dataclass()
+@dataclass
 class GuildPosition:
-    positions: List['GPosition'] = field()
+    @dataclass
+    class Position:
+        id: int = field()
+        position: int = field()
+
+    positions: List[Position] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class Overwrite:
     id: int = field()
     type: str = field()
@@ -203,7 +62,7 @@ class Overwrite:
     deny: int = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class Channel:
     id: int = field()
     name: str = field()
@@ -219,24 +78,23 @@ class Channel:
     user_limit: int = field()
     last_pin_timestamp: str = field()
     unread_count: int = field()
-    recipients: List[User] = dataclasses.field(default_factory=lambda: [])
-    permission_overwrites: List[Overwrite] = dataclasses.field(default_factory=lambda: [])
+    recipients: List[User] = field(default_factory=list)
+    permission_overwrites: List[Overwrite] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
-class CPosition:
-    id: int = field()
-    position: int = field()
-    parent_id: str = field()
-
-
-@dataclasses.dataclass()
+@dataclass
 class ChannelPosition:
+    @dataclass
+    class Position:
+        id: int = field()
+        position: int = field()
+        parent_id: str = field()
+
     guild_id: int = field()
-    positions: List['CPosition'] = field()
+    positions: List[Position] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class Role:
     id: str = field()
     guild_id: str = field()
@@ -248,38 +106,35 @@ class Role:
     mentionable: bool = field()
 
 
-@dataclasses.dataclass()
-class RPosition:
-    id: int = field()
-    position: int = field()
-
-
-@dataclasses.dataclass()
+@dataclass
 class RolePosition:
+    @dataclass
+    class Position:
+        id: int = field()
+        position: int = field()
+
     guild_id: int = field()
-    positions: List['RPosition'] = field()
+    positions: List[Position] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
-class MMember:
-    nick: str = field()
-    roles: List[int] = field()
-
-
-@dataclasses.dataclass()
-class MAttachment:
-    id: int = field()
-    filename: int = field()
-    hash: str = field()
-    type: str = field()
-    size: str = field()
-    width: int = field()
-    height: int = field()
-    url: str = field()
-
-
-@dataclasses.dataclass()
+@dataclass
 class Message:
+    @dataclass
+    class Member:
+        nick: str = field()
+        roles: List[int] = field()
+
+    @dataclass
+    class Attachment:
+        id: int = field()
+        filename: int = field()
+        hash: str = field()
+        type: str = field()
+        size: str = field()
+        width: int = field()
+        height: int = field()
+        url: str = field()
+
     id: int = field()
     channel_id: int = field()
     type: int = field()
@@ -287,18 +142,18 @@ class Message:
     nonce: int = field()
     content: str = field()
     author: User = field()
-    member: 'MMember' = field()
-    attachments: List['MAttachment'] = field()
-    mentions: List['User'] = field()
-    stamps: List['Stamp'] = field()
-    reply: 'Message' = field()
-    forward: 'MessageForward' = field()
+    member: Member = field()
+    reply: Message = field()
+    forward: MessageForward = field()
     pinned: bool = field()
     edited_timestamp: str = field()
-    embeds: List['Embed'] = field()
+    attachments: List[Attachment] = field(default_factory=list)
+    mentions: List[User] = field(default_factory=list)
+    stamps: List[Stamp] = field(default_factory=list)
+    embeds: List[Embed] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class GuildMember:
     user: User = field()
     guild_id: int = field()
@@ -310,7 +165,7 @@ class GuildMember:
     silence_expired: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class Emoji:
     id: int = field()
     guild_id: int = field()
@@ -320,110 +175,110 @@ class Emoji:
     img_url: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class MEmoji:
     id: int = field()
     name: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class MessageReaction:
     user_id: int = field()
     channel_id: int = field()
     message_id: int = field()
     guild_id: int = field()
-    emoji: 'MEmoji' = field()
+    emoji: MEmoji = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class MessageReactionRemoveAll:
     channel_id: int = field()
     message_id: int = field()
     guild_id: int = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class VoiceState:
     user_id: int = field()
     channel_id: int = field()
     guild_id: int = field()
     voice: int = field()
     session_id: str = field()
-    user: 'User' = field()
+    user: User = field()
     self_deaf: bool = field()
     self_mute: bool = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class Presence:
-    user: 'User' = field()
+    user: User = field()
     status: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class PartialPresence:
     user_id: int = field()
     status: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class Ready:
-    @dataclasses.dataclass()
+    @dataclass
     class Channel:
         id: int = field()
         type: int = field()
-        permission_overwrites: List[Overwrite] = dataclasses.field(default_factory=lambda: [])
+        permission_overwrites: List[Overwrite] = field(default_factory=list)
 
-    @dataclasses.dataclass()
+    @dataclass
     class DMChannel:
         id: int = field()
         type: int = field()
         visible: bool = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Role:
         id: int = field()
         permissions: int = field()
         position: int = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Guild:
         id: int = dataclasses.field()
         owner_id: int = dataclasses.field()
-        channels: List[Channel] = dataclasses.field(default_factory=lambda: [])
-        roles: List[Role] = dataclasses.field(default_factory=lambda: [])
-        member_roles: List[int] = dataclasses.field(default_factory=lambda: [])
+        member_roles: List[int] = dataclasses.field()
+        channels: List[Channel] = field(default_factory=list)
+        roles: List[Role] = field(default_factory=list)
 
     # user: 'User' = field()
-    guilds: List[Guild] = dataclasses.field(default_factory=lambda: [])
-    channels: List[DMChannel] = dataclasses.field(default_factory=lambda: [])
+    guilds: List[Guild] = field(default_factory=list)
+    channels: List[DMChannel] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class Identity:
-    guilds: List['Guild'] = field()
-    guild_settings: List['UserGuildSettings'] = field()
-    dm_channels: List['Channel'] = field()
-    stamp_packs: List['StampPack'] = field()
+    guilds: List[Guild] = field(default_factory=list)
+    guild_settings: List[UserGuildSettings] = field(default_factory=list)
+    dm_channels: List[Channel] = field(default_factory=list)
+    stamp_packs: List[StampPack] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class Logout:
     userId: int = field()
     sessionId: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class Typing:
     user_id: int = field()
     channel_id: int = field()
-    member: 'GuildMember' = field()
+    member: GuildMember = field()
     timestamp: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class UserGuildSettings:
-    @dataclasses.dataclass()
+    @dataclass
     class ChannelOverride:
         channel_id: int = field()
         message_notifications: int = field()
@@ -432,11 +287,11 @@ class UserGuildSettings:
     guild_id: int = field()
     message_notifications: int = field()
     muted: bool = field()
-    channel_overrides: 'ChannelOverride' = field()
+    channel_overrides: ChannelOverride = field()
     suppress_everyone: bool = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class Stamp:
     id: int = field()
     alias: str = field()
@@ -450,29 +305,29 @@ class Stamp:
     updated_at: str = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class StampPack:
     id: int = field()
     name: str = field()
     type: int = field()
     author_id: int = field()
-    stamps: List['Stamp'] = field()
     updated_at: str = field()
+    stamps: List[Stamp] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class Embed:
-    @dataclasses.dataclass()
+    @dataclass
     class Author:
         author_name: str = field()
         author_url: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Provider:
         provider_name: str = field()
         provider_url: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Thumbnail:
         thumbnail_url: str = field()
         thumbnail_height: int = field()
@@ -491,14 +346,14 @@ class Embed:
     thumbnail: Thumbnail = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class MessageForward:
-    @dataclasses.dataclass()
+    @dataclass
     class Guild:
         id: int = field()
         name: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Channel:
         id: int = field()
         name: str = field()
@@ -506,24 +361,24 @@ class MessageForward:
     id: int = field()
     guild: 'Guild' = field()
     channel: 'Channel' = field()
-    thumb: List['ForwardThumb'] = field()
+    thumb: List[ForwardThumb] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class ForwardThumb:
-    @dataclasses.dataclass()
+    @dataclass
     class Author:
         id: int = field()
         avatar: str = field()
         type: int = field()
         dname: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Attachment:
         hash: str = field()
         type: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Stamp:
         hash: str = field()
         animated: bool = field()
@@ -535,16 +390,16 @@ class ForwardThumb:
     stamp: Stamp = field()
 
 
-@dataclasses.dataclass()
+@dataclass
 class ForwardMessage:
-    @dataclasses.dataclass()
+    @dataclass
     class Author:
         id: int = field()
         avatar: str = field()
         type: int = field()
         dname: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Attachment:
         id: int = field()
         filename: str = field()
@@ -557,20 +412,20 @@ class ForwardMessage:
 
     id: int = field()
     content: str = field()
-    stamps: List['Stamp'] = field()
-    attachments: List['Attachment'] = field()
     reply: 'Message' = field()
     timestamp: str = field()
+    stamps: List[Stamp] = field(default_factory=list)
+    attachments: List[Attachment] = field(default_factory=list)
 
 
-@dataclasses.dataclass()
+@dataclass
 class Forward:
-    @dataclasses.dataclass()
+    @dataclass
     class Guild:
         id: int = field()
         name: str = field()
 
-    @dataclasses.dataclass()
+    @dataclass
     class Channel:
         id: int = field()
         name: str = field()
@@ -579,5 +434,5 @@ class Forward:
     content: str = field()
     guild: Guild = field()
     channel: Channel = field()
-    messages: List['ForwardMessage'] = field()
-    thumb: List['ForwardThumb'] = field()
+    messages: List[ForwardMessage] = field(default_factory=list)
+    thumb: List[ForwardThumb] = field(default_factory=list)

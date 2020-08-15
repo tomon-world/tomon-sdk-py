@@ -116,17 +116,6 @@ class Session(Observable):
         elif op == GatewayOp.IDENTIFY:
             self._ready = True
             self.emit('READY', data)
-            # d = data.get('d')
-            # print(d)
-            # ready = None
-            # try:
-            #     schema = marshmallow_dataclass.class_schema(Ready)
-            #     print("123")
-            #     ready = schema().load(d)
-            # except Exception as err:
-            #     print(err)
-            # finally:
-            #     print(ready)
         elif op == GatewayOp.HELLO:
             self._heartbeatInterval = data.get('d').get('heartbeat_interval')
             self._sessionId = data.get('d').get('session_id')
