@@ -1,11 +1,11 @@
-from src import bot
-from src.model import *
-from src.network import http
 import asyncio
 import marshmallow_dataclass
 from marshmallow_dataclass import dataclass
 
 import pdb
+
+from tomon_sdk import bot
+from tomon_sdk.model import *
 
 
 def onDispatch(data):
@@ -26,8 +26,9 @@ def onDispatch(data):
 
 if __name__ == "__main__":
     bot_app = bot.Bot()
-    http = http.HTTPClient()
 
+
+    # http = http.HTTPClient()
 
     async def main():
         bot_app.on(bot.OpCodeEvent.DISPATCH, onDispatch)
