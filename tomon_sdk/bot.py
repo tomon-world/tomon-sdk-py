@@ -1,11 +1,7 @@
-import json
-import aiohttp
 from .utils.observable import Observable
 from .network import api
-import asyncio
 # from events import EventType
 from .network import session
-import pdb
 
 
 class OpCodeEvent:
@@ -83,11 +79,10 @@ class Bot(Observable):
             credencials['password'] = kwargs['password']
         print('⏳ Start authenticating...')
         try:
-            # pdb.set_trace()
             info = await self.api().route(path='/auth/login').post(data=credencials, auth=False)
             self._token = info.get('token')
             self._session.token = info.get('token')
-            self._api.setToken(info.get('token'))
+            self._api.set_token(info.get('token'))
             self._id = info.get('id')
             self._name = info.get('name')
             self._username = info.get('username')
@@ -100,7 +95,6 @@ class Bot(Observable):
             print("❌ Authentication failed. Please check your identity.")
             return
 
-            # self.once ('READY', print)
         print("🚢 Connecting...")
 
         self.once('READY', self.ready_test)

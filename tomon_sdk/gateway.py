@@ -1,7 +1,6 @@
 import asyncio
 import json
 from enum import Enum
-
 import websocket
 
 try:

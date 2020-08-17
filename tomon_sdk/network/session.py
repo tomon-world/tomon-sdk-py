@@ -36,9 +36,9 @@ class Session(Observable):
         self.token = None
         self._buffer = bytearray()
 
-        self._ws.onOpen = self.handleOpen
-        self._ws.onClose = self.handleClose
-        self._ws.onMessage = self.handleMessage
+        self._ws.onOpen = self.handle_open
+        self._ws.onClose = self.handle_close
+        self._ws.onMessage = self.handle_message
         self._ws.onError = print
         self._ws.onReconnect = self.emit('NETWORK_RECONNECTING')
 
@@ -72,27 +72,19 @@ class Session(Observable):
     def ready(self):
         return self._ready
 
-    def handleOpen(self):
+    def handle_open(self):
         self._connected = True
-        # import pdb; pdb.set_trace()
         self.emit('NETWORK_CONNECTED')
 
-    def handleClose(self, reason=None):
+    def handle_close(self, reason=None):
         print(reason)
-        self.stopHeartbeat()
+        self.stop_heartbeat()
         self._sessionId = None
         self._connected = False
         self._ready = False
         self.emit('NETWORK_DISCONNECTED')
 
-    def unpack(self, data):
-
-        if (isinstance(data, str)):
-            data = data.decode(encoding='UTF-8')
-
-        return json.loads(data)
-
-    def handleMessage(self, event):
+    def handle_message(self, event):
         msg = event
         if type(msg) is bytes:
             self._buffer.extend(msg)
@@ -102,9 +94,9 @@ class Session(Observable):
                     msg = msg.decode(encoding='UTF-8')
                     self._buffer = bytearray()
 
-        self.handlePacket(json.loads(msg))
+        self.handle_packet(json.loads(msg))
 
-    def handlePacket(self, data):
+    def handle_packet(self, data):
         op = data.get("op")
         if op == GatewayOp.DISPATCH:
             self.emit(data.get('e'), data)
@@ -124,18 +116,18 @@ class Session(Observable):
             self.emit('HEARTBEAT_ACK')
 
     def heartbeat(self):
-        def startHeartbeat():
+        def start_heartbeat():
             self.emit('HEARTBEAT')
             self.send(GatewayOp.HEARTBEAT)
             self._heartbeatTimer = Timer(
-                self._heartbeatInterval / 1000, startHeartbeat)
+                self._heartbeatInterval / 1000, start_heartbeat)
             self._heartbeatTimer.start()
 
         self._heartbeatTimer = Timer(
-            self._heartbeatInterval / 1000, startHeartbeat)
+            self._heartbeatInterval / 1000, start_heartbeat)
         self._heartbeatTimer.start()
 
-    def stopHeartbeat(self):
+    def stop_heartbeat(self):
         if self._heartbeatTimer:
             self._heartbeatTimer.cancel()
             self._heartbeatTimer = None
