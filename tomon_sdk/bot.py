@@ -98,7 +98,10 @@ class Bot(Observable):
         print("🚢 Connecting...")
 
         self.once('READY', self.ready_test)
-        self.session().open()
+        try:
+            self.session().open()
+        except KeyboardInterrupt:
+            pass
 
     async def start(self, token):
         return await self._start(token=token)
