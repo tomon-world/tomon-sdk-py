@@ -14,10 +14,10 @@ class Route:
         self.url = url
 
     def auth(self):
-        if (self.token == None):
+        if self.token is None:
             return None
 
-        return ('Bearer ' + self.token)
+        return 'Bearer ' + self.token
 
     async def request(self, method, url, *args):
 
@@ -40,7 +40,6 @@ class Route:
                         filepath, 'rb'), filename=filename)
                 else:
                     for index, file in enumerate(list(arg['files'])):
-                        print
                         payload.add_field(
                             'file'+str(index), open(file, 'rb'), filename=os.path.basename(file))
 
@@ -51,9 +50,9 @@ class Route:
             async with aiohttp.request(method=method, url=url, data=payload, headers=headers) as r:
                 if 300 > r.status >= 200:
                     return await r.json()
-                elif (r.status == 404):
+                elif r.status == 404:
                     print("Not Found")
-                elif (r.status == 403):
+                elif r.status == 403:
                     print("Forbidden")
                 else:
                     print(await r.json())

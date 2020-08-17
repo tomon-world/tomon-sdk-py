@@ -41,7 +41,7 @@ class WS:
                 self.onError(error)
 
     @staticmethod
-    def retryDelay(times: int) -> int:
+    def retry_delay(times: int) -> int:
         if times <= 0:
             return 500
         elif times <= 1:
@@ -92,10 +92,10 @@ class WS:
     def _connect(self, url: str):
         self.state = WSState.CONNECTING
         self._ws = self._Client(url)
-        self._ws.onError = self._onError()
-        self._ws.onOpen = self._onOpen()
-        self._ws.onError = self._onError()
-        self._ws.onMessage = self._onMessage()
+        self._ws.onError = self._on_error()
+        self._ws.onOpen = self._on_open()
+        self._ws.onClose = self._on_close()
+        self._ws.onMessage = self._on_message()
         self._ws.connect()
         self._ws.run_forever()
 
@@ -104,7 +104,7 @@ class WS:
             self._reconnectTimer.cancel()
         self._reconnecting = True
 
-        def retryFunc():
+        def retry_func():
             self._retryCount += 1
             self._connect(url)
             if self.onReconnect is not None:
@@ -112,31 +112,31 @@ class WS:
 
         self.state = WSState.RECONNECTING
         self._reconnectTimer = Timer(
-            self.retryDelay(self._retryCount), retryFunc),
+            self.retry_delay(self._retryCount), retry_func),
 
     def _close(self, code: int, reason=None):
         if self._ws is not None:
             self.state = WSState.CLOSED
             self._ws.close(code, reason)
 
-    def _stopReconnect(self):
+    def _stop_reconnect(self):
         if self._reconnectTimer is not None:
             self._reconnectTimer.cancel()
             self._reconnectTimer = None
 
-    def _onOpen(self):
+    def _on_open(self):
         def onOpenFunc():
             self.state = WSState.OPEN
             self._retryCount = 0
             self._reconnecting = False
-            self._stopReconnect()
+            self._stop_reconnect()
             if self.onOpen is not None:
                 self.onOpen()
 
         return onOpenFunc
 
-    def _onClose(self):
-        def onCloseFunc(code: int, reason=None):
+    def _on_close(self):
+        def on_close_func(code: int, reason=None):
             self.state = WSState.CLOSED
             message = None
             if reason is not None:
@@ -150,19 +150,19 @@ class WS:
             if self.onClose is not None:
                 self.onClose(code, message)
 
-        return onCloseFunc
+        return on_close_func
 
-    def _onMessage(self):
-        def onMessageFunc(data):
+    def _on_message(self):
+        def on_message_func(data):
             if self.onMessage is not None:
                 self.onMessage(data)
 
-        return onMessageFunc
+        return on_message_func
 
-    def _onError(self):
-        def onErrorFunc(error):
+    def _on_error(self):
+        def on_error_func(error):
             self._connectError = error
             if self.onError is not None:
                 self.onError(error)
 
-        return onErrorFunc
+        return on_error_func

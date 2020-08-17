@@ -9,7 +9,7 @@ class Api:
     def token(self):
         return self._token
 
-    def setToken(self, token):
+    def set_token(self, token):
         self._token = token
 
     def route(self, path):
