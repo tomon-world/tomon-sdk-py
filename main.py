@@ -17,7 +17,7 @@ async def speak(data):
     d = data.get('d')
     if e == 'MESSAGE_CREATE':
         if d.get('author').get('id') != bot_app.id:
-            if d.get('content') == '/ping':
+            if d.get('content').strip() == '/ping':
                 channel_id = d.get('channel_id')
                 payload = {}
                 payload['content'] = 'pong'
