@@ -95,13 +95,13 @@ class Bot(Observable):
             print("❌ Authentication failed. Please check your identity.")
             return
 
-        print("🚢 Connecting...")
-
-        self.once('READY', self.ready_test)
         try:
             self.session().open()
         except (KeyboardInterrupt, SystemExit):
             pass
+
+        print("🚢 Connecting...")
+        self.once('READY', self.ready_test)
 
     async def start(self, token):
         return await self._start(token=token)
