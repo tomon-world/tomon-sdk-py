@@ -1,11 +1,12 @@
 import asyncio
+import time
+
 import marshmallow_dataclass
 from marshmallow_dataclass import dataclass
 import nest_asyncio
 from tomon_sdk import bot
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from datetime import datetime
-from syncer import sync
 
 nest_asyncio.apply()
 bot_app = None
@@ -41,38 +42,37 @@ async def _tick():
 
 # @sync
 async def worker2():
-
-    while True:
-        await asyncio.sleep(2)
-        print("First Worker Executed")
-        scheduler = AsyncIOScheduler()
-        scheduler.add_job(_tick, 'interval', seconds=5)
-        scheduler.start()
+    await asyncio.sleep(2)
+    print("First Worker Executed")
+    scheduler = AsyncIOScheduler()
+    scheduler.add_job(_tick, trigger='interval', seconds=10,max_instances=10)
+    scheduler.start()
 
 
 # @sync
 async def worker1():
-    while True:
-        await asyncio.sleep(3)
-        print("Second Worker Executed")
-        await bot_app.start(
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNDQ1NjcwMzUzMjk5NDU2MCIsImlhdCI6MTU5MTk1Mjg4M30.kSVY8QtlCFEDC-lJ6-EEjhVJrG4oHwd8NkQnpYi4vvc")
+    await asyncio.sleep(3)
+    print("Second Worker Executed")
+    await bot_app.start(
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNDQ1NjcwMzUzMjk5NDU2MCIsImlhdCI6MTU5MTk1Mjg4M30.kSVY8QtlCFEDC-lJ6-EEjhVJrG4oHwd8NkQnpYi4vvc")
 
     # # await bot_app.start_with_password("KZHIWEI#7479","A66871068a")
 
 
 if __name__ == "__main__":
-    token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNDQ1NjcwMzUzMjk5NDU2MCIsImlhdCI6MTU5MTk1Mjg4M30.kSVY8QtlCFEDC-lJ6-EEjhVJrG4oHwd8NkQnpYi4vvc"
+    # token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjEyNDQ1NjcwMzUzMjk5NDU2MCIsImlhdCI6MTU5MTk1Mjg4M30.kSVY8QtlCFEDC-lJ6-EEjhVJrG4oHwd8NkQnpYi4vvc"
     bot_app = bot.Bot()
     bot_app.on(bot.OpCodeEvent.DISPATCH, on_dispatch)
-
+    #
     loop = asyncio.get_event_loop()
-    try:
-        asyncio.ensure_future(worker1())
-        # asyncio.ensure_future(worker2())
-        loop.run_forever()
-    except(KeyboardInterrupt, SystemExit):
-        pass
+    # try:
+    #     cors = asyncio.wait([worker1(),worker2()])
+    #     # asyncio.ensure_future(worker2())
+    #     loop.run_until_complete(cors)
+    # except(KeyboardInterrupt, SystemExit):
+    #     pass
+    #
+    loop.run_until_complete(worker1())
     # bot_app = bot.Bot()
     # gid = "124457012091162624"
     # # bot_app.on("READY", lambda: {
