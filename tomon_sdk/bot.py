@@ -100,7 +100,7 @@ class Bot(Observable):
         self.once('READY', self.ready_test)
         try:
             self.session().open()
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, SystemExit):
             pass
 
     async def start(self, token):

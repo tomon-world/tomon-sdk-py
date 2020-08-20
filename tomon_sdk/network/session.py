@@ -76,7 +76,7 @@ class Session(Observable):
         self._connected = True
         self.emit('NETWORK_CONNECTED')
 
-    def handle_close(self, reason=None):
+    def handle_close(self, code, reason=None):
         print(reason)
         self.stop_heartbeat()
         self._sessionId = None

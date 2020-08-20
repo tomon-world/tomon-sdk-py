@@ -148,7 +148,7 @@ class WS:
             if code == 1006:
                 self._reconnect(self.url())
             if self.onClose is not None:
-                self.onClose(code, message)
+                self.onClose(code, reason=message)
 
         return on_close_func
 
