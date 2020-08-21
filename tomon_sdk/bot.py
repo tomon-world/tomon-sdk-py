@@ -1,3 +1,6 @@
+import asyncio
+import threading
+
 from .utils.observable import Observable
 from .network import api
 # from events import EventType
@@ -101,9 +104,26 @@ class Bot(Observable):
         except (KeyboardInterrupt, SystemExit):
             pass
 
+    def start(self, token):
+        def callback():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
 
-    async def start(self, token):
-        return await self._start(token=token)
+            loop.run_until_complete(self._start(token=token))
+            loop.close()
 
-    async def start_with_password(self, fullname, password):
-        return await self._start(full_name=fullname, password=password)
+        processThread = threading.Thread(target=callback)
+        processThread.start();
+        # return await self._start(token=token)
+
+    def start_with_password(self, fullname, password):
+        def callback():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            loop.run_until_complete(self._start(full_name=fullname, password=password))
+            loop.close()
+
+        processThread = threading.Thread(target=callback)
+        processThread.start()
+        # return await self._start(full_name=fullname, password=password)
