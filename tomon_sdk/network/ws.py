@@ -1,7 +1,6 @@
 import time
 from enum import Enum
 import json
-from threading import Timer
 from ws4py.client.threadedclient import WebSocketClient
 
 
@@ -54,7 +53,7 @@ class WS:
             return 10
 
     def __init__(self):
-        self.url = None
+        self._url = None
         self._ws = None
         self._retryCount = 0
         self._reconnecting = False
@@ -70,13 +69,13 @@ class WS:
         self.onMessage = None
 
     def open(self, url: str):
-        self.url = url
+        self._url = url
         if self.state != WSState.CLOSED:
             return
         self._need_reconnect = True
         self._force_close = False
         while self._need_reconnect and not self._force_close:
-            self._connect(self.url)
+            self._connect(self._url)
             time.sleep(self.retry_delay(self._retryCount))
 
     def close(self, code: int, reason=None):
@@ -109,20 +108,11 @@ class WS:
         self._ws.run_forever()
 
     def _reconnect(self, url: str):
-        # if self._reconnectTimer is not None:
-        #     self._reconnectTimer.cancel()
         self._reconnecting = True
         self._need_reconnect = True
-
-        # def retry_func():
         self._retryCount += 1
-        # self._connect(url)
         if self.onReconnect is not None:
             self.onReconnect(self._retryCount)
-
-        # self.state = WSState.RECONNECTING
-        # self._reconnectTimer = Timer(
-        #     self.retry_delay(self._retryCount), retry_func),
 
     def _close(self, code: int, reason=None):
         if self._ws is not None:
@@ -157,7 +147,7 @@ class WS:
                 except Exception as e:
                     message = reason
             if code == 1006 and not self._force_close:
-                self._reconnect(self.url())
+                self._reconnect(self._url)
             else:
                 self._force_close = True
                 self._need_reconnect = False

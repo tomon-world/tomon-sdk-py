@@ -3,7 +3,6 @@ import threading
 
 from .utils.observable import Observable
 from .network import api
-# from events import EventType
 from .network import session
 
 
@@ -102,6 +101,9 @@ class Bot(Observable):
         try:
             self.session().open()
         except (KeyboardInterrupt, SystemExit):
+            pass
+        finally:
+            print("Bot exit")
             pass
 
     def start(self, token):

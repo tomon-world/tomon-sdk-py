@@ -57,8 +57,8 @@ class Session(Observable):
     def open(self):
         self._ws.open(self._url)
 
-    def close(self, reason=None):
-        self._ws.close(reason)
+    def close(self, code: int, reason=None):
+        self._ws.close(code, reason=reason)
 
     def send(self, op, d=None):
         self._ws.send({"op": op, "d": d})
@@ -103,6 +103,7 @@ class Session(Observable):
         elif op == GatewayOp.IDENTIFY:
             self._ready = True
             self.emit('READY', data)
+            self._ws.close(4000)
         elif op == GatewayOp.HELLO:
             self._heartbeatInterval = data.get('d').get('heartbeat_interval')
             self._sessionId = data.get('d').get('session_id')
