@@ -105,7 +105,6 @@ class Session(Observable):
         elif op == GatewayOp.IDENTIFY:
             self._ready = True
             self.emit('READY', data)
-            self._ws.close(4000)
         elif op == GatewayOp.HELLO:
             self._heartbeatInterval = data.get('d').get('heartbeat_interval')
             self._sessionId = data.get('d').get('session_id')
