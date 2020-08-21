@@ -10,7 +10,7 @@ Python 3+ is required.
 
 ```
 # Linux/macOS
-python 3 -m pip install -U  tomon-sdk
+python3 -m pip install -U  tomon-sdk
 
 # Windows
 py -3 -m pip install -U tomon-sdk.

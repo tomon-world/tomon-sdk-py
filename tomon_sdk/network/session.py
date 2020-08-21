@@ -88,10 +88,12 @@ class Session(Observable):
         if type(msg) is bytes:
             self._buffer.extend(msg)
             if len(msg) >= 4:
-                if msg[-4:] == b'\x00\x00\xff\xff':
+                if self._buffer[-4:] == b'\x00\x00\xff\xff':
                     msg = zb.decompressobj().decompress(self._buffer)
                     msg = msg.decode(encoding='UTF-8')
-                    self._buffer = bytearray()
+                    self._buffer.clear()
+                else:
+                    return
 
         self.handle_packet(json.loads(msg))
 
