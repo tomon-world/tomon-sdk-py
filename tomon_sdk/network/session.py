@@ -39,8 +39,8 @@ class Session(Observable):
         self._ws.onOpen = self.handle_open
         self._ws.onClose = self.handle_close
         self._ws.onMessage = self.handle_message
-        self._ws.onError = print
-        self._ws.onReconnect = self.emit('NETWORK_RECONNECTING')
+        self._ws.onError = lambda err: print("[ws] error: {}".format(err))
+        self._ws.onReconnect = lambda _: (self.emit('NETWORK_RECONNECTING'), print("[ws] reconnecting"))
 
     def emit(self, event, *args):
         return super().emitter.emit(event, *args)
@@ -57,8 +57,8 @@ class Session(Observable):
     def open(self):
         self._ws.open(self._url)
 
-    def close(self, reason=None):
-        self._ws.close(reason)
+    def close(self, code: int, reason=None):
+        self._ws.close(code, reason=reason)
 
     def send(self, op, d=None):
         self._ws.send({"op": op, "d": d})
@@ -76,8 +76,7 @@ class Session(Observable):
         self._connected = True
         self.emit('NETWORK_CONNECTED')
 
-    def handle_close(self, reason=None):
-        print(reason)
+    def handle_close(self, code, reason=None):
         self.stop_heartbeat()
         self._sessionId = None
         self._connected = False
