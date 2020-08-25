@@ -1,5 +1,7 @@
 import asyncio
 import nest_asyncio
+from tomon_sdk.events import EventType
+
 from tomon_sdk import bot
 
 nest_asyncio.apply()
@@ -27,4 +29,5 @@ async def speak(data):
 if __name__ == "__main__":
     bot_app = bot.Bot()
     bot_app.on(bot.OpCodeEvent.DISPATCH, on_dispatch)
+    bot_app.on(EventType.EMOJI_CREATE, print)
     bot_app.start_with_password("name#0000", "password")
