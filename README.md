@@ -3,12 +3,12 @@
 <br />
 <p align="center">
   <a href="https://github.com/tomon-world/tomon-sdk-py">
-    <img src="images/LOGO%20with%20TOMON.png" alt="Logo" width="1200" height="400">
+    <img src="images/LOGO%20with%20TOMON.png" alt="Logo" width="1200" height="300">
   </a>
 
-  <h3 align="center">Tomon SDK Python</h3>
-
 </p>
+
+# Tomon SDK Python
 
 ## About
 
