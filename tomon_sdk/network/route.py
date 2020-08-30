@@ -19,32 +19,30 @@ class Route:
 
         return 'Bearer ' + self.token
 
-    async def request(self, method, url, *args):
-
+    async def request(self, method, url, **kwargs):
         headers = {}
         payload = {}
 
-        for arg in list(args):
-            if not ('auth' in arg and arg['auth'] == False):
-                headers['authorization'] = self.auth()
+        if not ('auth' in kwargs and kwargs['auth'] == False):
+            headers['authorization'] = self.auth()
 
-            if 'data' in arg:
-                payload = arg['data']
+        if 'data' in kwargs:
+            payload = kwargs['data']
 
-            if 'files' in arg:
-                payload = aiohttp.FormData()
-                if len(arg['files']) == 1:
-                    filepath = arg['files'][0]
-                    filename = os.path.basename(filepath)
-                    payload.add_field('file', open(
-                        filepath, 'rb'), filename=filename)
-                else:
-                    for index, file in enumerate(list(arg['files'])):
-                        payload.add_field(
-                            'file'+str(index), open(file, 'rb'), filename=os.path.basename(file))
+        if 'files' in kwargs:
+            payload = aiohttp.FormData()
+            if len(kwargs['files']) == 1:
+                filepath = kwargs['files'][0]
+                filename = os.path.basename(filepath)
+                payload.add_field('file', open(
+                    filepath, 'rb'), filename=filename)
+            else:
+                for index, file in enumerate(list(kwargs['files'])):
+                    payload.add_field(
+                        'file'+str(index), open(file, 'rb'), filename=os.path.basename(file))
 
-                if 'data' in arg:
-                    payload.add_field('payload_json', json.dumps(arg['data']))
+            if 'data' in kwargs:
+                payload.add_field('payload_json', json.dumps(kwargs['data']))
 
         try:
             async with aiohttp.request(method=method, url=url, data=payload, headers=headers) as r:
@@ -61,16 +59,16 @@ class Route:
             print(e)
 
     async def post(self, **kwargs):
-        return await self.request('POST', self.url, kwargs)
+        return await self.request('POST', self.url, **kwargs)
 
     async def get(self, **kwargs):
-        return await self.request('GET', self.url, kwargs)
+        return await self.request('GET', self.url, **kwargs)
 
     async def patch(self, **kwargs):
-        return await self.request('PATCH', self.url, kwargs)
+        return await self.request('PATCH', self.url, **kwargs)
 
     async def put(self, **kwargs):
-        return await self.request('PUT', self.url, kwargs)
+        return await self.request('PUT', self.url, **kwargs)
 
     async def delete(self, **kwargs):
-        return await self.request('DELETE', self.url, kwargs)
+        return await self.request('DELETE', self.url, **kwargs)
