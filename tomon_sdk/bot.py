@@ -9,6 +9,7 @@ from .network import session
 class OpCodeEvent:
     DISPATCH = 'DISPATCH'
     HEARTBEAT = 'HEARTBEAT'
+    HEARTBEAT_ACK = 'HEARTBEAT_ACK'
     READY = 'READY'
     # IDENTIFY = 'IDENTIFY'1
     HELLO = 'HELLO'
