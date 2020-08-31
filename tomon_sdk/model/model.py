@@ -222,7 +222,7 @@ class RPosition(Schema):
 
 class RolePosition(Schema):
     guild_id: int = fields.Int()
-    positions: List['RPosition'] = fields.List(RPosition)
+    positions: List['RPosition'] = fields.List(fields.Nested(RPosition))
 
 
 class MMember(Schema):
@@ -250,14 +250,14 @@ class Message(Schema):
     content: str = fields.Str()
     author: User = fields.Nested(User())
     member: 'MMember' = fields.Nested(MMember())
-    attachments: List['MAttachment'] = fields.List(MAttachment)
-    mentions: List['User'] = fields.List(User)
-    stamps: List['Stamp'] = fields.List(Stamp)
+    attachments: List['MAttachment'] = fields.List(fields.Nested(MAttachment))
+    mentions: List['User'] = fields.List(fields.Nested(User))
+    stamps: List['Stamp'] = fields.List(fields.Nested(Stamp))
     reply: 'Message' = fields.Nested('Message')
     forward: 'MessageForward' = fields.Nested(MessageForward)
     pinned: bool = fields.Bool()
     edited_timestamp: str = fields.Str()
-    embeds: List['Embed'] = fields.List(Embed)
+    embeds: List['Embed'] = fields.List(fields.Nested(Embed))
 
 
 class MEmoji(Schema):
@@ -288,7 +288,7 @@ class Ready(Schema):
     class Channel(Schema):
         id: int = fields.Int()
         type: int = fields.Int()
-        permission_overwrites: List[Overwrite] = fields.List(Overwrite)
+        permission_overwrites: List[Overwrite] = fields.List(fields.Nested(Overwrite))
 
     class DMChannel(Schema):
         id: int = fields.Int()
@@ -303,13 +303,13 @@ class Ready(Schema):
     class Guild(Schema):
         id: int = fields.Int()
         owner_id: int = fields.Int()
-        channels: List[Channel] = fields.List(Channel)
-        roles: List[Role] = fields.List(Role)
+        channels: List[Channel] = fields.List(fields.Nested(Channel))
+        roles: List[Role] = fields.List(fields.Nested(Role))
         member_roles: List[int] = fields.List(fields.Int)
 
     # user: 'User' = field()
-    guilds: List[Guild] = fields.List(Guild)
-    channels: List[DMChannel] = fields.List(DMChannel)
+    guilds: List[Guild] = fields.List(fields.Nested(Guild))
+    channels: List[DMChannel] = fields.List(fields.Nested(DMChannel))
 
 
 class UserGuildSettings(Schema):
@@ -326,10 +326,10 @@ class UserGuildSettings(Schema):
 
 
 class Identity(Schema):
-    guilds: List['Guild'] = fields.List(Guild)
-    guild_settings: List['UserGuildSettings'] = fields.List(UserGuildSettings)
-    dm_channels: List['Channel'] = fields.List(Channel)
-    stamp_packs: List['StampPack'] = fields.List(StampPack)
+    guilds: List['Guild'] = fields.List(fields.Nested(Guild))
+    guild_settings: List['UserGuildSettings'] = fields.List(fields.Nested(UserGuildSettings))
+    dm_channels: List['Channel'] = fields.List(fields.Nested(Channel))
+    stamp_packs: List['StampPack'] = fields.List(fields.Nested(StampPack))
 
 
 class Logout(Schema):
@@ -364,7 +364,7 @@ class ForwardMessage(Schema):
     id: int = fields.Int()
     content: str = fields.Str()
     stamps: List['Stamp'] = fields.Nested(Stamp)
-    attachments: List['Attachment'] = fields.List(Attachment)
+    attachments: List['Attachment'] = fields.List(fields.Nested(Attachment))
     reply: 'Message' = fields.Nested(Message)
     timestamp: str = fields.Str()
 
@@ -382,5 +382,5 @@ class Forward(Schema):
     content: str = fields.Str()
     guild: Guild = fields.Nested(Guild)
     channel: Channel = fields.Nested(Channel)
-    messages: List[ForwardMessage] = fields.List(ForwardMessage)
-    thumb: List['ForwardThumb'] = fields.List(ForwardThumb)
+    messages: List[ForwardMessage] = fields.List(fields.Nested(ForwardMessage))
+    thumb: List['ForwardThumb'] = fields.List(fields.Nested(ForwardThumb))
