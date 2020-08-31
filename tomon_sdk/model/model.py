@@ -228,36 +228,17 @@ class Ready(Schema):
     channels: List[DMChannel] = dataclasses.field(default_factory=lambda: [])
 
 
-class Identity(Schema):
-    guilds: List['Guild'] = field()
-    guild_settings: List['UserGuildSettings'] = field()
-    dm_channels: List['Channel'] = field()
-    stamp_packs: List['StampPack'] = field()
-
-
-class Logout(Schema):
-    userId: int = fields.Int()
-    sessionId: str = fields.Str()
-
-
-class Typing(Schema):
-    user_id: int = fields.Int()
-    channel_id: int = fields.Int()
-    member: 'GuildMember' = field()
-    timestamp: str = fields.Str()
-
-
 class UserGuildSettings(Schema):
     class ChannelOverride(Schema):
         channel_id: int = fields.Int()
         message_notifications: int = fields.Int()
-        muted: bool = field()
+        muted: bool = fields.Bool
 
     guild_id: int = fields.Int()
     message_notifications: int = fields.Int()
-    muted: bool = field()
-    channel_overrides: 'ChannelOverride' = field()
-    suppress_everyone: bool = field()
+    muted: bool = fields.Bool
+    channel_overrides: 'ChannelOverride' = fields.Nested(ChannelOverride)
+    suppress_everyone: bool = fields.Bool
 
 
 class Stamp(Schema):
@@ -267,7 +248,7 @@ class Stamp(Schema):
     pack_id: int = fields.Int()
     position: int = fields.Int()
     hash: str = fields.Str()
-    animated: bool = field()
+    animated: bool = fields.Bool
     width: int = fields.Int()
     height: int = fields.Int()
     updated_at: str = fields.Str()
@@ -278,8 +259,27 @@ class StampPack(Schema):
     name: str = fields.Str()
     type: int = fields.Int()
     author_id: int = fields.Int()
-    stamps: List['Stamp'] = field()
+    stamps: List['Stamp'] = fields.List(Stamp)
     updated_at: str = fields.Str()
+
+
+class Identity(Schema):
+    guilds: List['Guild'] = fields.List(Guild)
+    guild_settings: List['UserGuildSettings'] = fields.List(UserGuildSettings)
+    dm_channels: List['Channel'] = fields.List(Channel)
+    stamp_packs: List['StampPack'] = fields.List(StampPack)
+
+
+class Logout(Schema):
+    userId: int = fields.Int()
+    sessionId: str = fields.Str()
+
+
+class Typing(Schema):
+    user_id: int = fields.Int()
+    channel_id: int = fields.Int()
+    member: 'GuildMember' = fields.Nested(GuildMember)
+    timestamp: str = fields.Str()
 
 
 class Embed(Schema):
@@ -304,24 +304,9 @@ class Embed(Schema):
     description: str = fields.Str()
     height: int = fields.Int()
     width: int = fields.Int()
-    author: Author = field()
-    provider: Provider = field()
-    thumbnail: Thumbnail = field()
-
-
-class MessageForward(Schema):
-    class Guild(Schema):
-        id: int = fields.Int()
-        name: str = fields.Str()
-
-    class Channel(Schema):
-        id: int = fields.Int()
-        name: str = fields.Str()
-
-    id: int = fields.Int()
-    guild: 'Guild' = field()
-    channel: 'Channel' = field()
-    thumb: List['ForwardThumb'] = field()
+    author: Author = fields.Nested(Author)
+    provider: Provider = fields.Nested(Provider)
+    thumbnail: Thumbnail = fields.Nested(Thumbnail)
 
 
 class ForwardThumb(Schema):
@@ -337,13 +322,28 @@ class ForwardThumb(Schema):
 
     class Stamp(Schema):
         hash: str = fields.Str()
-        animated: bool = field()
+        animated: bool = fields.Bool()
 
     id: int = fields.Int()
     content: str = fields.Str()
-    author: Author = field()
-    attachment: Attachment = field()
-    stamp: Stamp = field()
+    author: Author = fields.Nested(Author)
+    attachment: Attachment = fields.Nested(Attachment)
+    stamp: Stamp = fields.Nested(Stamp)
+
+
+class MessageForward(Schema):
+    class Guild(Schema):
+        id: int = fields.Int()
+        name: str = fields.Str()
+
+    class Channel(Schema):
+        id: int = fields.Int()
+        name: str = fields.Str()
+
+    id: int = fields.Int()
+    guild: 'Guild' = fields.Nested(Guild)
+    channel: 'Channel' = fields.Nested(Channel)
+    thumb: List['ForwardThumb'] = fields.List(ForwardThumb)
 
 
 class ForwardMessage(Schema):
@@ -365,9 +365,9 @@ class ForwardMessage(Schema):
 
     id: int = fields.Int()
     content: str = fields.Str()
-    stamps: List['Stamp'] = field()
-    attachments: List['Attachment'] = field()
-    reply: 'Message' = field()
+    stamps: List['Stamp'] = fields.Nested(Stamp)
+    attachments: List['Attachment'] = fields.List(Attachment)
+    reply: 'Message' = fields.Nested(Message)
     timestamp: str = fields.Str()
 
 
@@ -382,7 +382,7 @@ class Forward(Schema):
 
     id: int = fields.Int()
     content: str = fields.Str()
-    guild: Guild = field()
-    channel: Channel = field()
-    messages: List['ForwardMessage'] = field()
-    thumb: List['ForwardThumb'] = field()
+    guild: Guild = fields.Nested(Guild)
+    channel: Channel = fields.Nested(Channel)
+    messages: List[ForwardMessage] = fields.List(ForwardMessage)
+    thumb: List['ForwardThumb'] = fields.List(ForwardThumb)
