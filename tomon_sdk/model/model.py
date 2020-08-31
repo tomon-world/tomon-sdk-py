@@ -170,7 +170,7 @@ class MessageReaction(Schema):
     channel_id: int = fields.Int()
     message_id: int = fields.Int()
     guild_id: int = fields.Int()
-    emoji: 'MEmoji' = field()
+    emoji: 'MEmoji' = fields.Nested(MEmoji)
 
 
 class MessageReactionRemoveAll(Schema):
@@ -185,13 +185,13 @@ class VoiceState(Schema):
     guild_id: int = fields.Int()
     voice: int = fields.Int()
     session_id: str = fields.Str()
-    user: 'User' = field()
-    self_deaf: bool = field()
-    self_mute: bool = field()
+    user: 'User' = fields.Nested(User)
+    self_deaf: bool = fields.Bool()
+    self_mute: bool = fields.Bool()
 
 
 class Presence(Schema):
-    user: 'User' = field()
+    user: 'User' = fields.Nested(User)
     status: str = fields.Str()
 
 
@@ -204,12 +204,12 @@ class Ready(Schema):
     class Channel(Schema):
         id: int = fields.Int()
         type: int = fields.Int()
-        permission_overwrites: List[Overwrite] = dataclasses.field(default_factory=lambda: [])
+        permission_overwrites: List[Overwrite] = fields.List(Overwrite)
 
     class DMChannel(Schema):
         id: int = fields.Int()
         type: int = fields.Int()
-        visible: bool = field()
+        visible: bool = fields.Bool()
 
     class Role(Schema):
         id: int = fields.Int()
@@ -217,22 +217,22 @@ class Ready(Schema):
         position: int = fields.Int()
 
     class Guild(Schema):
-        id: int = dataclasses.field()
-        owner_id: int = dataclasses.field()
-        channels: List[Channel] = dataclasses.field(default_factory=lambda: [])
-        roles: List[Role] = dataclasses.field(default_factory=lambda: [])
-        member_roles: List[int] = dataclasses.field(default_factory=lambda: [])
+        id: int = fields.Int()
+        owner_id: int = fields.Int()
+        channels: List[Channel] = fields.List(Channel)
+        roles: List[Role] = fields.List(Role)
+        member_roles: List[int] = fields.List(fields.Int)
 
     # user: 'User' = field()
-    guilds: List[Guild] = dataclasses.field(default_factory=lambda: [])
-    channels: List[DMChannel] = dataclasses.field(default_factory=lambda: [])
+    guilds: List[Guild] = fields.List(Guild)
+    channels: List[DMChannel] = fields.List(DMChannel)
 
 
 class Identity(Schema):
-    guilds: List['Guild'] = field()
-    guild_settings: List['UserGuildSettings'] = field()
-    dm_channels: List['Channel'] = field()
-    stamp_packs: List['StampPack'] = field()
+    guilds: List['Guild'] = fields.List(Guild)
+    guild_settings: List['UserGuildSettings'] = fields.List(UserGuildSettings)
+    dm_channels: List['Channel'] = fields.List(Channel)
+    stamp_packs: List['StampPack'] = fields.List(StampPack)
 
 
 class Logout(Schema):
@@ -251,13 +251,13 @@ class UserGuildSettings(Schema):
     class ChannelOverride(Schema):
         channel_id: int = fields.Int()
         message_notifications: int = fields.Int()
-        muted: bool = field()
+        muted: bool = fields.Bool()
 
     guild_id: int = fields.Int()
     message_notifications: int = fields.Int()
-    muted: bool = field()
-    channel_overrides: 'ChannelOverride' = field()
-    suppress_everyone: bool = field()
+    muted: bool = fields.Bool()
+    channel_overrides: 'ChannelOverride' = fields.Nested(ChannelOverride)
+    suppress_everyone: bool = fields.Bool()
 
 
 class Stamp(Schema):
