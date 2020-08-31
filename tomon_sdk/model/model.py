@@ -14,7 +14,87 @@ class User(Schema):
     type: int = fields.Int()
 
 
-# 公会
+class Emoji(Schema):
+    id: int = fields.Int()
+    guild_id: int = fields.Int()
+    name: str = fields.Str()
+    user: User = fields.Nested(User)
+    img: str = fields.Str()
+    img_url: str = fields.Str()
+
+
+class GPosition(Schema):
+    id: int = fields.Int()
+    position: int = fields.Int()
+
+
+class GuildPosition(Schema):
+    positions: List['GPosition'] = fields.List(GPosition)
+
+
+class Overwrite(Schema):
+    id: int = fields.Int()
+    type: str = fields.Str()
+    allow: int = fields.Int()
+    deny: int = fields.Int()
+
+
+class VoiceState(Schema):
+    user_id: int = fields.Int()
+    channel_id: int = fields.Int()
+    guild_id: int = fields.Int()
+    voice: int = fields.Int()
+    session_id: str = fields.Str()
+    user: 'User' = fields.Nested(User)
+    self_deaf: bool = fields.Bool()
+    self_mute: bool = fields.Bool()
+
+
+class Role(Schema):
+    id: str = fields.Str()
+    guild_id: str = fields.Str()
+    name: str = fields.Str()
+    permissions: int = fields.Int()
+    color: int = fields.Int()
+    position: int = fields.Int()
+    hoist: bool = fields.Bool()
+    mentionable: bool = fields.Bool()
+
+
+class PartialPresence(Schema):
+    user_id: int = fields.Int()
+    status: str = fields.Str()
+
+
+class Channel(Schema):
+    id: int = fields.Int()
+    name: str = fields.Str()
+    type: int = fields.Int()
+    guild_id: int = fields.Int()
+    position: int = fields.Int()
+    topic: str = fields.Str()
+    last_message_id: int = fields.Int()
+    parent_id: int = fields.Int()
+    ack_message_id: int = fields.Int()
+    default_message_notifications: int = fields.Int()
+    bitrate: int = fields.Int()
+    user_limit: int = fields.Int()
+    last_pin_timestamp: str = fields.Str()
+    unread_count: int = fields.Int()
+    recipients: List[User] = fields.List(User)
+    permission_overwrites: List[Overwrite] = fields.List(Overwrite)
+
+
+class GuildMember(Schema):
+    user: User = fields.Nested(User)
+    guild_id: int = fields.Int()
+    nick: str = fields.Str()
+    roles: List[int] = fields.List(fields.Int)
+    joined_at: str = fields.Str()
+    deaf: bool = fields.Bool
+    mute: bool = fields.Bool
+    silence_expired: str = fields.Str()
+
 
 class Guild(Schema):
     id: int = fields.Int()
@@ -38,41 +118,6 @@ class Guild(Schema):
     presences: List['PartialPresence'] = fields.List(PartialPresence)
 
 
-class GPosition(Schema):
-    id: int = fields.Int()
-    position: int = fields.Int()
-
-
-class GuildPosition(Schema):
-    positions: List['GPosition'] = fields.List(GPosition)
-
-
-class Overwrite(Schema):
-    id: int = fields.Int()
-    type: str = fields.Str()
-    allow: int = fields.Int()
-    deny: int = fields.Int()
-
-
-class Channel(Schema):
-    id: int = fields.Int()
-    name: str = fields.Str()
-    type: int = fields.Int()
-    guild_id: int = fields.Int()
-    position: int = fields.Int()
-    topic: str = fields.Str()
-    last_message_id: int = fields.Int()
-    parent_id: int = fields.Int()
-    ack_message_id: int = fields.Int()
-    default_message_notifications: int = fields.Int()
-    bitrate: int = fields.Int()
-    user_limit: int = fields.Int()
-    last_pin_timestamp: str = fields.Str()
-    unread_count: int = fields.Int()
-    recipients: List[User] = fields.List(User)
-    permission_overwrites: List[Overwrite] = fields.List(Overwrite)
-
-
 class CPosition(Schema):
     id: int = fields.Int()
     position: int = fields.Int()
@@ -84,15 +129,90 @@ class ChannelPosition(Schema):
     positions: List['CPosition'] = fields.List(CPosition)
 
 
-class Role(Schema):
-    id: str = fields.Str()
-    guild_id: str = fields.Str()
-    name: str = fields.Str()
-    permissions: int = fields.Int()
-    color: int = fields.Int()
+class Stamp(Schema):
+    id: int = fields.Int()
+    alias: str = fields.Str()
+    author_id: int = fields.Int()
+    pack_id: int = fields.Int()
     position: int = fields.Int()
-    hoist: bool = fields.Bool()
-    mentionable: bool = fields.Bool()
+    hash: str = fields.Str()
+    animated: bool = fields.Bool
+    width: int = fields.Int()
+    height: int = fields.Int()
+    updated_at: str = fields.Str()
+
+
+class StampPack(Schema):
+    id: int = fields.Int()
+    name: str = fields.Str()
+    type: int = fields.Int()
+    author_id: int = fields.Int()
+    stamps: List['Stamp'] = fields.List(Stamp)
+    updated_at: str = fields.Str()
+
+
+class ForwardThumb(Schema):
+    class Author(Schema):
+        id: int = fields.Int()
+        avatar: str = fields.Str()
+        type: int = fields.Int()
+        dname: str = fields.Str()
+
+    class Attachment(Schema):
+        hash: str = fields.Str()
+        type: str = fields.Str()
+
+    class Stamp(Schema):
+        hash: str = fields.Str()
+        animated: bool = fields.Bool()
+
+    id: int = fields.Int()
+    content: str = fields.Str()
+    author: Author = fields.Nested(Author)
+    attachment: Attachment = fields.Nested(Attachment)
+    stamp: Stamp = fields.Nested(Stamp)
+
+
+class MessageForward(Schema):
+    class Guild(Schema):
+        id: int = fields.Int()
+        name: str = fields.Str()
+
+    class Channel(Schema):
+        id: int = fields.Int()
+        name: str = fields.Str()
+
+    id: int = fields.Int()
+    guild: 'Guild' = fields.Nested(Guild)
+    channel: 'Channel' = fields.Nested(Channel)
+    thumb: List['ForwardThumb'] = fields.List(ForwardThumb)
+
+
+class Embed(Schema):
+    class Author(Schema):
+        author_name: str = fields.Str()
+        author_url: str = fields.Str()
+
+    class Provider(Schema):
+        provider_name: str = fields.Str()
+        provider_url: str = fields.Str()
+
+    class Thumbnail(Schema):
+        thumbnail_url: str = fields.Str()
+        thumbnail_height: int = fields.Int()
+        thumbnail_width: int = fields.Int()
+        external_url: str = fields.Str()
+
+    id: int = fields.Int()
+    type: str = fields.Str()
+    title: str = fields.Str()
+    url: str = fields.Str()
+    description: str = fields.Str()
+    height: int = fields.Int()
+    width: int = fields.Int()
+    author: Author = fields.Nested(Author)
+    provider: Provider = fields.Nested(Provider)
+    thumbnail: Thumbnail = fields.Nested(Thumbnail)
 
 
 class RPosition(Schema):
@@ -133,31 +253,11 @@ class Message(Schema):
     attachments: List['MAttachment'] = fields.List(MAttachment)
     mentions: List['User'] = fields.List(User)
     stamps: List['Stamp'] = fields.List(Stamp)
-    reply: 'Message' = fields.Nested(Message)
+    reply: 'Message' = fields.Nested('Message')
     forward: 'MessageForward' = fields.Nested(MessageForward)
     pinned: bool = fields.Bool()
     edited_timestamp: str = fields.Str()
     embeds: List['Embed'] = fields.List(Embed)
-
-
-class GuildMember(Schema):
-    user: User = fields.Nested(User)
-    guild_id: int = fields.Int()
-    nick: str = fields.Str()
-    roles: List[int] = fields.List(fields.Int)
-    joined_at: str = fields.Str()
-    deaf: bool = fields.Bool
-    mute: bool = fields.Bool
-    silence_expired: str = fields.Str()
-
-
-class Emoji(Schema):
-    id: int = fields.Int()
-    guild_id: int = fields.Int()
-    name: str = fields.Str()
-    user: User = fields.Nested(User)
-    img: str = fields.Str()
-    img_url: str = fields.Str()
 
 
 class MEmoji(Schema):
@@ -179,24 +279,8 @@ class MessageReactionRemoveAll(Schema):
     guild_id: int = fields.Int()
 
 
-class VoiceState(Schema):
-    user_id: int = fields.Int()
-    channel_id: int = fields.Int()
-    guild_id: int = fields.Int()
-    voice: int = fields.Int()
-    session_id: str = fields.Str()
-    user: 'User' = fields.Nested(User)
-    self_deaf: bool = fields.Bool()
-    self_mute: bool = fields.Bool()
-
-
 class Presence(Schema):
     user: 'User' = fields.Nested(User)
-    status: str = fields.Str()
-
-
-class PartialPresence(Schema):
-    user_id: int = fields.Int()
     status: str = fields.Str()
 
 
@@ -228,6 +312,19 @@ class Ready(Schema):
     channels: List[DMChannel] = fields.List(DMChannel)
 
 
+class UserGuildSettings(Schema):
+    class ChannelOverride(Schema):
+        channel_id: int = fields.Int()
+        message_notifications: int = fields.Int()
+        muted: bool = fields.Bool
+
+    guild_id: int = fields.Int()
+    message_notifications: int = fields.Int()
+    muted: bool = fields.Bool
+    channel_overrides: 'ChannelOverride' = fields.Nested(ChannelOverride)
+    suppress_everyone: bool = fields.Bool
+
+
 class Identity(Schema):
     guilds: List['Guild'] = fields.List(Guild)
     guild_settings: List['UserGuildSettings'] = fields.List(UserGuildSettings)
@@ -243,107 +340,8 @@ class Logout(Schema):
 class Typing(Schema):
     user_id: int = fields.Int()
     channel_id: int = fields.Int()
-    member: 'GuildMember' = field()
+    member: 'GuildMember' = fields.Nested(GuildMember)
     timestamp: str = fields.Str()
-
-
-class UserGuildSettings(Schema):
-    class ChannelOverride(Schema):
-        channel_id: int = fields.Int()
-        message_notifications: int = fields.Int()
-        muted: bool = fields.Bool()
-
-    guild_id: int = fields.Int()
-    message_notifications: int = fields.Int()
-    muted: bool = fields.Bool()
-    channel_overrides: 'ChannelOverride' = fields.Nested(ChannelOverride)
-    suppress_everyone: bool = fields.Bool()
-
-
-class Stamp(Schema):
-    id: int = fields.Int()
-    alias: str = fields.Str()
-    author_id: int = fields.Int()
-    pack_id: int = fields.Int()
-    position: int = fields.Int()
-    hash: str = fields.Str()
-    animated: bool = field()
-    width: int = fields.Int()
-    height: int = fields.Int()
-    updated_at: str = fields.Str()
-
-
-class StampPack(Schema):
-    id: int = fields.Int()
-    name: str = fields.Str()
-    type: int = fields.Int()
-    author_id: int = fields.Int()
-    stamps: List['Stamp'] = field()
-    updated_at: str = fields.Str()
-
-
-class Embed(Schema):
-    class Author(Schema):
-        author_name: str = fields.Str()
-        author_url: str = fields.Str()
-
-    class Provider(Schema):
-        provider_name: str = fields.Str()
-        provider_url: str = fields.Str()
-
-    class Thumbnail(Schema):
-        thumbnail_url: str = fields.Str()
-        thumbnail_height: int = fields.Int()
-        thumbnail_width: int = fields.Int()
-        external_url: str = fields.Str()
-
-    id: int = fields.Int()
-    type: str = fields.Str()
-    title: str = fields.Str()
-    url: str = fields.Str()
-    description: str = fields.Str()
-    height: int = fields.Int()
-    width: int = fields.Int()
-    author: Author = field()
-    provider: Provider = field()
-    thumbnail: Thumbnail = field()
-
-
-class MessageForward(Schema):
-    class Guild(Schema):
-        id: int = fields.Int()
-        name: str = fields.Str()
-
-    class Channel(Schema):
-        id: int = fields.Int()
-        name: str = fields.Str()
-
-    id: int = fields.Int()
-    guild: 'Guild' = field()
-    channel: 'Channel' = field()
-    thumb: List['ForwardThumb'] = field()
-
-
-class ForwardThumb(Schema):
-    class Author(Schema):
-        id: int = fields.Int()
-        avatar: str = fields.Str()
-        type: int = fields.Int()
-        dname: str = fields.Str()
-
-    class Attachment(Schema):
-        hash: str = fields.Str()
-        type: str = fields.Str()
-
-    class Stamp(Schema):
-        hash: str = fields.Str()
-        animated: bool = field()
-
-    id: int = fields.Int()
-    content: str = fields.Str()
-    author: Author = field()
-    attachment: Attachment = field()
-    stamp: Stamp = field()
 
 
 class ForwardMessage(Schema):
@@ -365,9 +363,9 @@ class ForwardMessage(Schema):
 
     id: int = fields.Int()
     content: str = fields.Str()
-    stamps: List['Stamp'] = field()
-    attachments: List['Attachment'] = field()
-    reply: 'Message' = field()
+    stamps: List['Stamp'] = fields.Nested(Stamp)
+    attachments: List['Attachment'] = fields.List(Attachment)
+    reply: 'Message' = fields.Nested(Message)
     timestamp: str = fields.Str()
 
 
@@ -382,7 +380,7 @@ class Forward(Schema):
 
     id: int = fields.Int()
     content: str = fields.Str()
-    guild: Guild = field()
-    channel: Channel = field()
-    messages: List['ForwardMessage'] = field()
-    thumb: List['ForwardThumb'] = field()
+    guild: Guild = fields.Nested(Guild)
+    channel: Channel = fields.Nested(Channel)
+    messages: List[ForwardMessage] = fields.List(ForwardMessage)
+    thumb: List['ForwardThumb'] = fields.List(ForwardThumb)
