@@ -3,6 +3,7 @@ import nest_asyncio
 from tomon_sdk.events import EventType
 
 from tomon_sdk import bot
+from tomon_sdk.model.model import Ready, Message
 
 nest_asyncio.apply()
 bot_app = None
@@ -26,8 +27,15 @@ async def speak(data):
                 await bot_app.api().route('/channels/{}/messages'.format(channel_id)).post(data=payload)
 
 
+def marsh(data):
+    ready = Message()
+    r = ready.load(data)
+    print(r)
+
+
 if __name__ == "__main__":
     bot_app = bot.Bot()
     bot_app.on(bot.OpCodeEvent.DISPATCH, on_dispatch)
     bot_app.on(EventType.EMOJI_CREATE, print)
-    bot_app.start_with_password("name#0000", "password")
+    bot_app.on(bot.OpCodeEvent.DISPATCH, marsh)
+    bot_app.start_with_password("KZHIWEI#7479", "A66871068a")

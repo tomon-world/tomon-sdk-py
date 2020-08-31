@@ -29,7 +29,7 @@ class GPosition(Schema):
 
 
 class GuildPosition(Schema):
-    positions: List['GPosition'] = fields.List(GPosition)
+    positions: List[GPosition] = fields.List(fields.Nested(GPosition))
 
 
 class Overwrite(Schema):
@@ -81,8 +81,8 @@ class Channel(Schema):
     user_limit: int = fields.Int()
     last_pin_timestamp: str = fields.Str()
     unread_count: int = fields.Int()
-    recipients: List[User] = fields.List(User)
-    permission_overwrites: List[Overwrite] = fields.List(Overwrite)
+    recipients: List[User] = fields.List(fields.Nested(User))
+    permission_overwrites: List[Overwrite] = fields.List(fields.Nested(Overwrite))
 
 
 class GuildMember(Schema):
@@ -110,12 +110,12 @@ class Guild(Schema):
     background: str = fields.Str()
     background_url: str = fields.Str()
     background_props: str = fields.Str()
-    channels: List['Channel'] = fields.List(Channel)
-    roles: List['Role'] = fields.List(Role)
-    emojis: List['Emoji'] = fields.List(Emoji)
-    members: List['GuildMember'] = fields.List(GuildMember)
-    voice_states: List['VoiceState'] = fields.List(VoiceState)
-    presences: List['PartialPresence'] = fields.List(PartialPresence)
+    channels: List['Channel'] = fields.List(fields.Nested(Channel))
+    roles: List['Role'] = fields.List(fields.Nested(Role))
+    emojis: List['Emoji'] = fields.List(fields.Nested(Emoji))
+    members: List['GuildMember'] = fields.List(fields.Nested(GuildMember))
+    voice_states: List['VoiceState'] = fields.List(fields.Nested(VoiceState))
+    presences: List['PartialPresence'] = fields.List(fields.Nested(PartialPresence))
 
 
 class CPosition(Schema):
@@ -126,7 +126,7 @@ class CPosition(Schema):
 
 class ChannelPosition(Schema):
     guild_id: int = fields.Int()
-    positions: List['CPosition'] = fields.List(CPosition)
+    positions: List['CPosition'] = fields.List(fields.Nested(CPosition))
 
 
 class Stamp(Schema):
@@ -147,7 +147,7 @@ class StampPack(Schema):
     name: str = fields.Str()
     type: int = fields.Int()
     author_id: int = fields.Int()
-    stamps: List['Stamp'] = fields.List(Stamp)
+    stamps: List['Stamp'] = fields.List(fields.Nested(Stamp))
     updated_at: str = fields.Str()
 
 
@@ -185,7 +185,7 @@ class MessageForward(Schema):
     id: int = fields.Int()
     guild: 'Guild' = fields.Nested(Guild)
     channel: 'Channel' = fields.Nested(Channel)
-    thumb: List['ForwardThumb'] = fields.List(ForwardThumb)
+    thumb: List['ForwardThumb'] = fields.List(fields.Nested(ForwardThumb))
 
 
 class Embed(Schema):
