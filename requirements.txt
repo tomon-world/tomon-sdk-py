@@ -1,4 +1,4 @@
-aiohttp==3.6.2
+aiohttp==3.7.4
 node-events==0.6.9
 autopep8==1.5.4
 marshmallow~=3.7.1
